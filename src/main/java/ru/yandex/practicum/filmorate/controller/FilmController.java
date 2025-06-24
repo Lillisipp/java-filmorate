@@ -26,21 +26,26 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(@RequestBody Film film) {
+        log.debug("Создание нового фильма: {}", film);
         validateFilm(film);
         film.setId(Utils.getNextId(films));
+        log.debug("Фильм добавлен с ID: {}", film.getId());
         return film;
     }
 
     @PutMapping
     public Film updateFilm(@RequestBody Film newFilm) {
         if (newFilm.getId() == null) {
+            log.warn("Обновление отменено — ID не указан.");
             throw new ConditionsNotMetException("Id должен быть указан.");
         }
         if (!films.containsKey(newFilm.getId())) {
-            throw new ConditionsNotMetException("Пользователь с таким ID не найден.");
+            log.warn("Обновление отменено — фильм с ID {} не найден.", newFilm.getId());
+            throw new ConditionsNotMetException("Фильм с таким ID не найден.");
         }
         validateFilm(newFilm);
         films.put(newFilm.getId(), newFilm);
+        log.debug("Фильм с ID {} успешно обновлён.", newFilm.getId());
         return newFilm;
     }
 
@@ -49,18 +54,28 @@ public class FilmController {
         return films.values();
     }
 
+
     private void validateFilm(Film film) {
-        if (!StringUtils.hasText(film.getName()) || film.getName().contains(" ")) {
-            throw new ValidationException("название не может быть пустым");
+        if (!StringUtils.hasText(film.getName())) {
+            log.warn("Ошибка валидации: пустое или некорректное имя фильма: '{}'", film.getName());
+            throw new ValidationException("Название не может быть пустым");
         }
-        if (!StringUtils.hasText(film.getName()) || film.getDescription().length() > MAX_DESC_LENGTH) {
-            throw new ValidationException("максимальная длина описания — 200 символов.");
+
+        if (!StringUtils.hasText(film.getDescription()) || film.getDescription().length() > MAX_DESC_LENGTH) {
+            log.warn("Ошибка валидации: описание слишком длинное ({} символов).",
+                    film.getDescription() != null ? film.getDescription().length() : 0);
+            throw new ValidationException("Максимальная длина описания — 200 символов.");
         }
-        if (film.getDuration().compareTo(Duration.ZERO) >= 0) {
-            throw new ValidationException("продолжительность фильма должна быть положительным числом.");
+
+        if (film.getDuration() == null || film.getDuration().compareTo(Duration.ZERO) <= 0) {
+            log.warn("Ошибка валидации: продолжительность не положительная: {}", film.getDuration());
+            throw new ValidationException("Продолжительность фильма должна быть положительным числом.");
         }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 11, 28))) {
-            throw new ValidationException("дата релиза — не раньше 28 декабря 1895 года.");
+
+        if (film.getReleaseDate() == null || film.getReleaseDate()
+                .isBefore(LocalDate.of(1895, 12, 28))) {
+            log.warn("Ошибка валидации: дата релиза слишком ранняя: {}", film.getReleaseDate());
+            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года.");
         }
     }
 }
