@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ public class FilmController {
 
 
     @PostMapping
-    public Film addFilm(@RequestBody Film film) {
+    public Film addFilm(@Valid @RequestBody Film film) {
         log.debug("Создание нового фильма: {}", film);
         validateFilm(film);
         film.setId(Utils.getNextId(films));
@@ -34,7 +35,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film newFilm) {
+    public Film updateFilm(@Valid @RequestBody Film newFilm) {
         if (newFilm.getId() == null) {
             log.warn("Обновление отменено — ID не указан.");
             throw new ConditionsNotMetException("Id должен быть указан.");

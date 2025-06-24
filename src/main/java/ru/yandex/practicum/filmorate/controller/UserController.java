@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.utils.Utils;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class UserController {
     private final Map<Integer, User> users = new HashMap<>();
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
+    public User createUser(@Valid @RequestBody User user) {
         log.info("Получен запрос на создание пользователя: {}", user);
         validateUser(user);
         user.setId(Utils.getNextId(users)); // присваиваем ID
@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User newUser) {
+    public User updateUser(@Valid @RequestBody User newUser) {
         if (newUser.getId() == null) {
             log.warn("Обновление отклонено: ID не указан");
             throw new ConditionsNotMetException("Id должен быть указан.");
