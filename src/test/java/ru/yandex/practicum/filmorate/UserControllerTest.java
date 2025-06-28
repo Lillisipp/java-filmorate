@@ -35,7 +35,7 @@ class UserControllerTest {
         user.setName("Test User");
         user.setBirthday(LocalDate.of(2000, 1, 1));
 
-        mockMvc.perform(post("/user")
+        mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isOk())
@@ -52,7 +52,7 @@ class UserControllerTest {
         user.setName("Test User");
         user.setBirthday(LocalDate.of(2000, 1, 1));
 
-        mockMvc.perform(post("/user")
+        mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isBadRequest())
@@ -67,7 +67,7 @@ class UserControllerTest {
         user.setName("Test User");
         user.setBirthday(LocalDate.of(2000, 1, 1));
 
-        mockMvc.perform(post("/user")
+        mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user))
                 )
@@ -80,7 +80,7 @@ class UserControllerTest {
         user.setName("Updated User");
         user.setBirthday(LocalDate.of(1995, 5, 15));
 
-        mockMvc.perform(put("/user")
+        mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isOk())
@@ -98,7 +98,7 @@ class UserControllerTest {
         updatedUser.setName("Updated User");
         updatedUser.setBirthday(LocalDate.of(1995, 5, 15));
 
-        mockMvc.perform(put("/user")
+        mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedUser)))
                 .andExpect(status().isNotFound())
@@ -122,17 +122,17 @@ class UserControllerTest {
         user2.setName("User Two");
         user2.setBirthday(LocalDate.of(1995, 5, 5));
 
-        mockMvc.perform(post("/user")
+        mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user1)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(post("/user")
+        mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user2)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/user"))
+        mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].email", is("user1@example.com")))

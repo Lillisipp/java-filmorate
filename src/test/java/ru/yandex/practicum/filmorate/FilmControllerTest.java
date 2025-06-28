@@ -38,7 +38,7 @@ class FilmControllerTest {
         film.setDuration(Duration.ofMinutes(148));
         film.setReleaseDate(LocalDate.of(2010, 7, 16));
 
-        mockMvc.perform(post("/film")
+        mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film)))
                 .andExpect(status().isOk())
@@ -50,7 +50,7 @@ class FilmControllerTest {
     void testAddFilmValidationErrorEmptyName() throws Exception {
         Film film = new Film(1, " ", "abbb", LocalDate.of(2010, 7, 16), Duration.ofMinutes(148));
 
-        mockMvc.perform(post("/film")
+        mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film)))
                 .andExpect(status().isBadRequest())
@@ -66,7 +66,7 @@ class FilmControllerTest {
         film.setDuration(Duration.ofMinutes(169));
         film.setReleaseDate(LocalDate.of(2014, 11, 7));
 
-        mockMvc.perform(post("/film")
+        mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film)))
                 .andExpect(status().isOk())
@@ -78,7 +78,7 @@ class FilmControllerTest {
         film.setDuration(Duration.ofMinutes(180));
         film.setReleaseDate(LocalDate.of(2014, 11, 7));
 
-        mockMvc.perform(put("/film")
+        mockMvc.perform(put("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film))
                 )
@@ -97,7 +97,7 @@ class FilmControllerTest {
         updatedFilm.setDuration(Duration.ofMinutes(120));
         updatedFilm.setReleaseDate(LocalDate.of(2000, 1, 1));
 
-        mockMvc.perform(put("/film")
+        mockMvc.perform(put("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedFilm)))
                 .andExpect(status().isNotFound())
@@ -111,18 +111,18 @@ class FilmControllerTest {
         Film film2 = new Film(2, "Film 2", "Description 2", LocalDate.of(2010, 5, 10), Duration.ofMinutes(90));
 
         // Добавляем фильмы в коллекцию
-        mockMvc.perform(post("/film")
+        mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film1)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(post("/film")
+        mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film2)))
                 .andExpect(status().isOk());
 
         // Проверяем получение всех фильмов
-        mockMvc.perform(get("/film")
+        mockMvc.perform(get("/films")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
