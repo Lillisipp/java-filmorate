@@ -6,6 +6,7 @@ import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -13,18 +14,19 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class User {
-    Integer id;
+    private Integer id;
 
-    @Email
-    @NotBlank
-    String email;
+    @Email(message = "Электронная почта должна содержать символ '@'.")
+    @NotBlank(message = "Электронная почта не может быть пустой")
+    private String email;
 
     @NotBlank
     @Pattern(regexp = "^\\S*$")
-    String login;
-    String name;
+    private String login;
+    private String name;
 
     @PastOrPresent
-    LocalDate birthday;
+    private LocalDate birthday;
 }

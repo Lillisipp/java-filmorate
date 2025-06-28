@@ -30,6 +30,7 @@ public class FilmController {
         log.debug("Создание нового фильма: {}", film);
         validateFilm(film);
         film.setId(Utils.getNextId(films));
+        films.put(film.getId(),film);
         log.debug("Фильм добавлен с ID: {}", film.getId());
         return film;
     }
