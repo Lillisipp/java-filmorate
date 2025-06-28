@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -30,5 +31,8 @@ public class Film {
     @NotNull
     private LocalDate releaseDate;
 
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER, pattern = "MINUTES")
     private Duration duration;
+
+
 }

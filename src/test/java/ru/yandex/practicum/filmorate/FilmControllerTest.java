@@ -42,6 +42,7 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film)))
                 .andExpect(status().isOk())
+                .andDo(print())
                 .andExpect(jsonPath("$.name", is("Inception")))
                 .andExpect(jsonPath("$.description", is("A sci-fi movie about dreams.")));
     }
@@ -54,7 +55,7 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film)))
                 .andExpect(status().isBadRequest())
-//                .andDo(print());
+                .andDo(print())
                 .andExpect(jsonPath("$.name", containsString("Название не может быть пустым")));
     }
 
