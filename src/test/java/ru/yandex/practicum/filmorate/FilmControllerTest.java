@@ -101,7 +101,7 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedFilm)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$", containsString("Фильм с таким ID не найден")));
+                .andExpect(jsonPath("$.detail", containsString("Фильм с таким ID не найден")));
     }
 
     @Test

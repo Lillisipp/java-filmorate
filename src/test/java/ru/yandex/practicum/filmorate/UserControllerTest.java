@@ -103,7 +103,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(updatedUser)))
                 .andExpect(status().isNotFound())
                 .andDo(print())
-                .andExpect(jsonPath("$", containsString("Пользователь с таким ID не найден.")));
+                .andExpect(jsonPath("$.detail", containsString("Пользователь с таким ID не найден.")));
     }
 
     @Test
