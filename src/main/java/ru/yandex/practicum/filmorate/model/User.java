@@ -5,28 +5,28 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
+//@Getter
+//@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class User {
     private Integer id;
 
-    @Email(message = "Электронная почта должна содержать символ '@'.")
+    @Email(regexp = ".*@.*", message = "Электронная почта должна содержать символ '@'.")
     @NotBlank(message = "Электронная почта не может быть пустой")
     private String email;
 
     @NotBlank
-    @Pattern(regexp = "^\\S*$")
+    @Pattern(regexp = "^\\S*$", message = "Логин не может быть пустым и содержать пробелы.")
     private String login;
     private String name;
 
-    @PastOrPresent
+    @PastOrPresent(message = "Дата рождения не может быть в будущем.")
     private LocalDate birthday;
 }

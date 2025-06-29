@@ -56,10 +56,6 @@ public class UserController {
     }
 
     private void validateUser(User user) {
-        if (!StringUtils.hasText(user.getEmail()) || !user.getEmail().contains("@")) {
-            log.warn("Ошибка валидации: некорректный email: {}", user.getEmail());
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ '@'.");
-        }
         if (!StringUtils.hasText(user.getLogin()) || user.getLogin().contains(" ")) {
             log.warn("Ошибка валидации: некорректный логин: {}", user.getLogin());
             throw new ValidationException("Логин не может быть пустым и содержать пробелы.");

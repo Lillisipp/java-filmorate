@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -15,10 +12,10 @@ import java.time.LocalDate;
 /**
  * Film.
  */
-@Getter
-@Setter
+
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class Film {
     private Integer id;
 

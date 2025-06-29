@@ -134,5 +134,35 @@ class FilmControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    void testCreateFilmReleaseDateExactly1895_12_28() throws Exception {
+        Film film = new Film();
+        film.setName("Первый фильм");
+        film.setDescription("Исторический фильм, ровно на дату первого показа.");
+        film.setReleaseDate(LocalDate.of(1895, 12, 28)); // Ровно 28 декабря 1895 года
+        film.setDuration(Duration.ofMinutes(50)); // 50 минут
 
+        mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(film)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.releaseDate", is("1895-12-28")));
+    }
+
+    @Test
+    void testCreateFilmDescriptionExactly200Characters() throws Exception {
+        String description = "a".repeat(200); // Ровно 200 символов
+
+        Film film = new Film();
+        film.setName("Фильм с длинным описанием");
+        film.setDescription(description);
+        film.setReleaseDate(LocalDate.of(2000, 1, 1)); // Любая допустимая дата
+        film.setDuration(Duration.ofMinutes(120)); // 120 минут
+
+        mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(film)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.description", is(description)));
+    }
 }

@@ -12,10 +12,12 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -137,5 +139,37 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].email", is("user1@example.com")))
                 .andExpect(jsonPath("$[1].email", is("user2@example.com")));
+    }
+
+    @Test
+    void testErrorBirthdayInFuture() throws Exception {
+        User user = new User();
+        user.setEmail("test@example.com");
+        user.setLogin("testuser");
+        user.setName("Test User");
+        user.setBirthday(LocalDate.now().plusDays(1)); // Дата рождения в будущем
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+                .andExpect(jsonPath("$.birthday", containsString("Дата рождения не может быть в будущем.")));
+    }
+
+    @Test
+    void testErrorLoginWithSpaces() throws Exception {
+        User user = new User();
+        user.setEmail("test@example.com");
+        user.setLogin("invalid login"); // Логин с пробелами
+        user.setName("Test User");
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+                .andExpect(jsonPath("$.login", containsString("Логин не может быть пустым и содержать пробелы.")));
     }
 }
