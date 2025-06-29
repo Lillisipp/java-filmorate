@@ -6,11 +6,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.utils.Utils;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,8 +23,10 @@ public class UserController {
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
         log.info("Получен запрос на создание пользователя: {}", user);
-        validateUser(user);
         user.setId(Utils.getNextId(users)); // присваиваем ID
+        if (!StringUtils.hasText(user.getName())) {
+            user.setName(user.getLogin());
+        }
         users.put(user.getId(), user);
         log.info("Пользователь создан с ID: {}", user.getId());
         return user;
@@ -43,8 +43,6 @@ public class UserController {
             throw new NotFoundException("Пользователь с таким ID не найден.");
         }
 
-        validateUser(newUser);
-
         users.put(newUser.getId(), newUser);
         log.info("Пользователь с ID {} успешно обновлён", newUser.getId());
         return newUser;
@@ -53,19 +51,5 @@ public class UserController {
     @GetMapping
     public Collection<User> getUsers() {
         return users.values();
-    }
-
-    private void validateUser(User user) {
-        if (!StringUtils.hasText(user.getLogin()) || user.getLogin().contains(" ")) {
-            log.warn("Ошибка валидации: некорректный логин: {}", user.getLogin());
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы.");
-        }
-        if (!StringUtils.hasText(user.getName())) {
-            user.setName(user.getLogin());
-        }
-        if (user.getBirthday() != null && user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Ошибка валидации: дата рождения в будущем: {}", user.getBirthday());
-            throw new ValidationException("Дата рождения не может быть в будущем.");
-        }
     }
 }
