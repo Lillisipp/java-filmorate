@@ -106,7 +106,7 @@ class FilmControllerTest {
     }
 
     @Test
-    void testGetFilm() throws Exception {
+    void testGetFilms() throws Exception {
         // Создаём два фильма
         Film film1 = new Film(1, "Film 1", "Description 1", LocalDate.of(2000, 1, 1), Duration.ofMinutes(120));
         Film film2 = new Film(2, "Film 2", "Description 2", LocalDate.of(2010, 5, 10), Duration.ofMinutes(90));
