@@ -49,7 +49,7 @@ public class UserService {
     }
 
     public Optional<User> getUserById(Integer id) {
-        return Optional.ofNullable(users.get(id));
+        return userStorage.getUserById(id);
     }
 
 
