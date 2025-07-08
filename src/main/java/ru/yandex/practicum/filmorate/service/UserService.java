@@ -8,11 +8,8 @@ import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
-import ru.yandex.practicum.filmorate.utils.Utils;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -32,23 +29,23 @@ public class UserService {
         return user;
     }
 
-    public User updateUser(User newUser) {
-        if (newUser.getId() == null) {
+    public User updateUser(User updateUser) {
+        if (updateUser.getId() == null) {
             log.warn("Обновление отклонено: ID не указан");
             throw new ConditionsNotMetException("Id должен быть указан.");
         }
-        if (!users.containsKey(newUser.getId())) {
-            log.warn("Обновление отклонено: пользователь с ID {} не найден", newUser.getId());
+        if (userStorage.exist(updateUser)) {
+            log.warn("Обновление отклонено: пользователь с ID {} не найден", updateUser.getId());
             throw new NotFoundException("Пользователь с таким ID не найден.");
         }
-userStorage.update(newUser);
-        users.put(newUser.getId(), newUser);
-        log.info("Пользователь с ID {} успешно обновлён", newUser.getId());
-        return newUser;
+        userStorage.update(updateUser);
+
+        log.info("Пользователь с ID {} успешно обновлён", updateUser.getId());
+        return updateUser;
     }
 
     public Collection<User> getUsers() {
-        return users.values();
+        return userStorage.getUsers();
     }
 
     public Optional<User> getUserById(Integer id) {

@@ -7,13 +7,10 @@ import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.utils.Utils;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -21,34 +18,32 @@ import java.util.Map;
 public class FilmService {
 
     private final FilmStorage filmStorage;
-    private final Map<Integer, Film> films = new HashMap<>();
 
     public Film addFilm(Film film) {
         log.debug("Создание нового фильма: {}", film);
         validateFilm(film);
-        film.setId(Utils.getNextId(films));
-        films.put(film.getId(), film);
+        filmStorage.save(film);
         log.debug("Фильм добавлен с ID: {}", film.getId());
         return film;
     }
 
-    public Film updateFilm(Film newFilm) {
-        if (newFilm.getId() == null) {
+    public Film updateFilm(Film updatedFilm) {
+        if (updatedFilm.getId() == null) {
             log.warn("Обновление отменено — ID не указан.");
             throw new ConditionsNotMetException("Id должен быть указан.");
         }
-        if (!films.containsKey(newFilm.getId())) {
-            log.warn("Обновление отменено — фильм с ID {} не найден.", newFilm.getId());
+        if (filmStorage.exist(updatedFilm)) {
+            log.warn("Обновление отменено — фильм с ID {} не найден.", updatedFilm.getId());
             throw new ConditionsNotMetException("Фильм с таким ID не найден.");
         }
-        validateFilm(newFilm);
-        films.put(newFilm.getId(), newFilm);
-        log.debug("Фильм с ID {} успешно обновлён.", newFilm.getId());
-        return newFilm;
+        validateFilm(updatedFilm);
+        filmStorage.update(updatedFilm);
+        log.debug("Фильм с ID {} успешно обновлён.", updatedFilm.getId());
+        return updatedFilm;
     }
 
     public Collection<Film> getFilms() {
-        return films.values();
+        return filmStorage.getFilms();
     }
 
     private void validateFilm(Film film) {

@@ -7,5 +7,10 @@ import java.util.Collection;
 public interface UserStorage {
     Collection<User> getUsers();
     User save(User user);
-    User updateUser
+    User update(User newUser);
+    User delete(User user);
+
+    boolean exist(User user);
+
+    User getUserById(Integer id);
 }
