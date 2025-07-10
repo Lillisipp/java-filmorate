@@ -10,15 +10,16 @@ import lombok.NoArgsConstructor;
 
 import java.time.Duration;
 import java.time.LocalDate;
-
-/**
- * Film.
- */
+import java.util.HashSet;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class Film {
+
+    private Set<Integer> likes = new HashSet<>();
+
     private Integer id;
 
     @NotBlank(message = "Название не может быть пустым")
