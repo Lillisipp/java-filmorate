@@ -1,18 +1,17 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.utils.Utils;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
+
     private final Map<Integer, User> users = new HashMap<>();
 
     @Override
@@ -45,5 +44,58 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public Optional<User> getUserById(Integer id) {
         return Optional.ofNullable(users.get(id));
+    }
+
+    @Override
+    public User addFriend(Integer id, Integer friendId) {
+        User user = users.get(id);
+        User userFrend = users.get(friendId);
+        if (user != null && friendId != null) {
+            user.getFriends().add(friendId);
+            userFrend.getFriends().add(id);
+        }
+        return user;
+    }
+
+    @Override
+    public User removeFrend(Integer id, Integer friendId) {
+        User user = users.get(id);
+        User userFrend = users.get(friendId);
+        if (user != null && friendId != null) {
+            user.getFriends().remove(friendId);
+            userFrend.getFriends().remove(id);
+        }
+        return user;
+
+    }
+
+    @Override
+    public Collection<User> getListFrends(Integer id) {
+        User user = users.get(id);
+        if (user == null) return Collections.emptyList();
+        return user.getFriends().stream()
+                .map(users::get)
+                .toList();
+    }
+
+    @Override
+    public Collection<User> getMutualFrends(Integer id, Integer otherdId) {
+        User user = users.get(id);
+        User other = users.get(otherdId);
+        if (user == null || other == null) {
+            return Collections.emptyList();
+        }
+        Set<Integer> mutualIds = new HashSet<>(user.getFriends());
+        mutualIds.retainAll(other.getFriends());
+        return mutualIds.stream()
+                .map(users::get)
+                .toList();
+    }
+
+    @Override
+    public void checkUserExists(Integer id) {
+        if (!users.containsKey(id)) {
+            throw new NotFoundException("Пользователь с id = " + id + " не найден");
+        }
     }
 }

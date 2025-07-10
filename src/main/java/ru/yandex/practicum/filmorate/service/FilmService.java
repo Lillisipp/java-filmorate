@@ -57,5 +57,17 @@ public class FilmService {
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года.");
         }
     }
+
+
+    public Film likeFilm(Integer id) {
+        
+    }
+
+    public Film DeletelikeFilm(Integer id) {
+    }
+
+    public Collection<Film> TopLikeFilm() {
+
+    }
 }
 

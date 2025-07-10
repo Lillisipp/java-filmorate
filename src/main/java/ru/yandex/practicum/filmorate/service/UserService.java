@@ -54,5 +54,29 @@ public class UserService {
 
 
     public User addFriend(Integer id, Integer friendId) {
+        userStorage.checkUserExists(id);
+        userStorage.checkUserExists(friendId);
+        log.info("Пользователь {} добавил в друзья пользователя {}", id, friendId);
+        return userStorage.addFriend(id, friendId);
     }
+
+    public User removeFriend(Integer id, Integer friendId) {
+        userStorage.checkUserExists(id);
+        userStorage.checkUserExists(friendId);
+
+        return userStorage.removeFrend(id, friendId);
+    }
+
+    public Collection<User> getListFriends(Integer id) {
+        userStorage.checkUserExists(id);
+        return userStorage.getListFrends(id);
+    }
+
+    public Collection<User> getMutualFriends(Integer id, Integer friendId) {
+        userStorage.checkUserExists(id);
+        userStorage.checkUserExists(friendId);
+        return userStorage.getMutualFrends(id, friendId);
+    }
+
+
 }
