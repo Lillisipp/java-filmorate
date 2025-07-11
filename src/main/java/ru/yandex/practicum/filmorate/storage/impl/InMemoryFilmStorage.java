@@ -1,15 +1,14 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.utils.Utils;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -43,23 +42,27 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film delete(Film film) {
-        return null;
-    }
-
-    @Override
     public void likeFilm(int filmId, int userId) {
         Film film = getFilmById(filmId);
+        film.getLikes().add(userId);
     }
+
 
     @Override
     public void removeLikeFilm(int filmId, int userId) {
-
+        Film film = getFilmById(filmId);
+        if (!film.getLikes().contains(userId)) {
+            throw new ConditionsNotMetException("Лайк от пользователя не найден.");
+        }
+        film.getLikes().remove(userId);
     }
 
     @Override
     public List<Film> TopLikeFilm(int count) {
-        return List.of();
+        return films.values().stream()
+                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -31,17 +31,17 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film likeFilm(@PathVariable int filmId, @PathVariable int userId) {
+    public Film likeFilm(@PathVariable ("id") int filmId, @PathVariable int userId) {
         return filmService.likeFilm(filmId,userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public Film removeLikeFilm() {
-        return filmService.DeletelikeFilm(likeFilm().getId());
+        return filmService.removeLikeFilm(likeFilm().getId());
     }
 
-    @GetMapping("/popular?count={count}")
-    public Collection<Film> TopLikeFilm() {
+    @GetMapping("/popular")
+    public Collection<Film> TopLikeFilm(@RequestParam(defaultValue = "10")int count) {
         return filmService.TopLikeFilm();
     }
     //возвращает список из первых count фильмов по количеству лайков.

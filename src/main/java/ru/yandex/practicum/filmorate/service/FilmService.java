@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ import java.util.Collection;
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     public Film addFilm(Film film) {
         log.debug("Создание нового фильма: {}", film);
@@ -59,15 +61,20 @@ public class FilmService {
     }
 
 
-    public Film likeFilm(Integer id) {
-        
+    public Film likeFilm(Integer filmId, Integer userId) {
+        userStorage.checkUserExists(userId);
+        filmStorage.likeFilm(filmId, userId);
+        log.info("Пользователь {} лайкнул фильм {}", userId, filmId);
     }
 
-    public Film DeletelikeFilm(Integer id) {
+    public Film removeLikeFilm(int filmId, int userId) {
+        userStorage.checkUserExists(userId);
+        filmStorage.removeLikeFilm(filmId, userId);
+        log.info("Пользователь {} удалил лайк с фильма {}", userId, filmId);
     }
 
-    public Collection<Film> TopLikeFilm() {
-
+    public Collection<Film> TopLikeFilm(int count) {
+        return filmStorage.TopLikeFilm(count);
     }
 }
 
