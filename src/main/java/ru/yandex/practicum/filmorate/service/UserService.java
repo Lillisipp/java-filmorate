@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -30,14 +29,8 @@ public class UserService {
     }
 
     public User updateUser(User updateUser) {
-        if (updateUser.getId() == null) {
-            log.warn("Обновление отклонено: ID не указан");
-            throw new ConditionsNotMetException("Id должен быть указан.");
-        }
-        if (userStorage.exist(updateUser)) {
-            log.warn("Обновление отклонено: пользователь с ID {} не найден", updateUser.getId());
-            throw new NotFoundException("Пользователь с таким ID не найден.");
-        }
+
+        checkUserExists(updateUser.getId());
         userStorage.update(updateUser);
 
         log.info("Пользователь с ID {} успешно обновлён", updateUser.getId());
@@ -52,31 +45,32 @@ public class UserService {
         return userStorage.getUserById(id);
     }
 
-
     public User addFriend(Integer id, Integer friendId) {
-        userStorage.checkUserExists(id);
-        userStorage.checkUserExists(friendId);
+        checkUserExists(id);
+        checkUserExists(friendId);
         log.info("Пользователь {} добавил в друзья пользователя {}", id, friendId);
         return userStorage.addFriend(id, friendId);
     }
 
-    public User removeFriend(Integer id, Integer friendId) {
-        userStorage.checkUserExists(id);
-        userStorage.checkUserExists(friendId);
-
-        return userStorage.removeFrend(id, friendId);
+    public void removeFriend(Integer id, Integer friendId) {
+        userStorage.removeFriend(id, friendId);
     }
 
     public Collection<User> getListFriends(Integer id) {
-        userStorage.checkUserExists(id);
-        return userStorage.getListFrends(id);
+        checkUserExists(id);
+        return userStorage.getListFriends(id);
     }
 
     public Collection<User> getMutualFriends(Integer id, Integer friendId) {
-        userStorage.checkUserExists(id);
-        userStorage.checkUserExists(friendId);
-        return userStorage.getMutualFrends(id, friendId);
+        checkUserExists(id);
+        checkUserExists(friendId);
+        return userStorage.getMutualFriends(id, friendId);
     }
 
-
+    public void checkUserExists(Integer id) {
+        if (!userStorage.exist(id)) {
+            log.warn("Обновление отклонено: пользователь с ID {} не найден", id);
+            throw new NotFoundException("Пользователь с id = " + id + " не найден");
+        }
+    }
 }

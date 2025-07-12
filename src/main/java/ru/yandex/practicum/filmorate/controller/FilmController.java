@@ -31,21 +31,27 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film likeFilm(@PathVariable ("id") int filmId, @PathVariable int userId) {
-        return filmService.likeFilm(filmId,userId);
+    public void likeFilm(
+            @PathVariable("id") int filmId,
+            @PathVariable int userId
+    ) {
+        filmService.likeFilm(filmId, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public Film removeLikeFilm() {
-        return filmService.removeLikeFilm(likeFilm().getId());
+    public void removeLikeFilm(
+            @PathVariable("id") int filmId,
+            @PathVariable int userId
+    ) {
+        filmService.removeLikeFilm(filmId, userId);
     }
 
     @GetMapping("/popular")
-    public Collection<Film> TopLikeFilm(@RequestParam(defaultValue = "10")int count) {
-        return filmService.TopLikeFilm();
+    public Collection<Film> topLikeFilm(
+            @RequestParam(defaultValue = "10") int count
+    ) {
+        return filmService.topLikeFilm(count);
     }
-    //возвращает список из первых count фильмов по количеству лайков.
-    // Если значение параметра count не задано, верните первые 10.
 
 
 }

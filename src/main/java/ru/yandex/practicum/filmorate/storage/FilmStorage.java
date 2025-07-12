@@ -19,7 +19,7 @@ public interface FilmStorage {
 
     void removeLikeFilm(int filmId, int userId);
 
-    List<Film> TopLikeFilm(int count);
+    List<Film> topLikeFilm(int count);
 
     boolean exist(Film film);
 }

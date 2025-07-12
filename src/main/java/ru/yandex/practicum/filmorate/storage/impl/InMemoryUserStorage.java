@@ -32,13 +32,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User delete(User user) {
-        return null;
+    public void delete(User user) {
+        ;
     }
 
     @Override
-    public boolean exist(User user) {
-        return users.containsKey(user.getId());
+    public boolean exist(Integer id) {
+        return users.containsKey(id);
     }
 
     @Override
@@ -58,28 +58,28 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User removeFrend(Integer id, Integer friendId) {
-        User user = users.get(id);
-        User userFrend = users.get(friendId);
-        if (user != null && friendId != null) {
-            user.getFriends().remove(friendId);
-            userFrend.getFriends().remove(id);
-        }
-        return user;
-
+    public void removeFriend(Integer id, Integer friendId) {
+        getUserById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"))
+                .getFriends()
+                .remove(friendId);
     }
 
     @Override
-    public Collection<User> getListFrends(Integer id) {
+    public Collection<User> getListFriends(Integer id) {
         User user = users.get(id);
-        if (user == null) return Collections.emptyList();
-        return user.getFriends().stream()
+        if (user == null) {
+            return Collections.emptyList();
+        }
+        return user
+                .getFriends()
+                .stream()
                 .map(users::get)
                 .toList();
     }
 
     @Override
-    public Collection<User> getMutualFrends(Integer id, Integer otherdId) {
+    public Collection<User> getMutualFriends(Integer id, Integer otherdId) {
         User user = users.get(id);
         User other = users.get(otherdId);
         if (user == null || other == null) {
@@ -90,12 +90,5 @@ public class InMemoryUserStorage implements UserStorage {
         return mutualIds.stream()
                 .map(users::get)
                 .toList();
-    }
-
-    @Override
-    public void checkUserExists(Integer id) {
-        if (!users.containsKey(id)) {
-            throw new NotFoundException("Пользователь с id = " + id + " не найден");
-        }
     }
 }

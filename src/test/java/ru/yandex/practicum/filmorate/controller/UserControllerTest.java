@@ -1,19 +1,23 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -26,6 +30,9 @@ class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private UserService userService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -36,6 +43,8 @@ class UserControllerTest {
         user.setLogin("testuser");
         user.setName("Test User");
         user.setBirthday(LocalDate.of(2000, 1, 1));
+
+        when(userService.createUser(user)).thenReturn(user);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -69,6 +78,8 @@ class UserControllerTest {
         user.setName("Test User");
         user.setBirthday(LocalDate.of(2000, 1, 1));
 
+        when(userService.updateUser(user)).thenReturn(user);
+
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user))
@@ -100,6 +111,8 @@ class UserControllerTest {
         updatedUser.setName("Updated User");
         updatedUser.setBirthday(LocalDate.of(1995, 5, 15));
 
+        when(userService.updateUser(updatedUser)).thenThrow(new NotFoundException("Пользователь с таким ID не найден."));
+
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedUser)))
@@ -124,15 +137,7 @@ class UserControllerTest {
         user2.setName("User Two");
         user2.setBirthday(LocalDate.of(1995, 5, 5));
 
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user1)))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user2)))
-                .andExpect(status().isOk());
+        when(userService.getUsers()).thenReturn(List.of(user1, user2));
 
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
