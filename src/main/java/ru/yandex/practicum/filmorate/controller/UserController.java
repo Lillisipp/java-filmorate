@@ -67,6 +67,4 @@ public class UserController {
     ) {
         return userService.getMutualFriends(id, friendId);
     }
-
-
 }
