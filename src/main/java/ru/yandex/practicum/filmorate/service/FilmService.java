@@ -33,7 +33,7 @@ public class FilmService {
             log.warn("Обновление отменено — ID не указан.");
             throw new ConditionsNotMetException("Id должен быть указан.");
         }
-        if (filmStorage.exist(updatedFilm)) {
+        if (!filmStorage.exist(updatedFilm)) {
             log.warn("Обновление отменено — фильм с ID {} не найден.", updatedFilm.getId());
             throw new ConditionsNotMetException("Фильм с таким ID не найден.");
         }

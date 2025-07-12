@@ -71,7 +71,7 @@ public class FilmServiceTest {
         film.setDuration(Duration.ofMinutes(120));
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
 
-        when(filmStorage.exist(film)).thenReturn(false);
+        when(filmStorage.exist(film)).thenReturn(true);
         when(filmStorage.update(film)).thenReturn(film);
 
         Film result = filmService.updateFilm(film);
@@ -95,7 +95,7 @@ public class FilmServiceTest {
         film.setDuration(Duration.ofMinutes(100));
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
 
-        when(filmStorage.exist(film)).thenReturn(true);
+        when(filmStorage.exist(film)).thenReturn(false);
 
         ConditionsNotMetException ex = assertThrows(ConditionsNotMetException.class, () -> filmService.updateFilm(film));
         assertEquals("Фильм с таким ID не найден.", ex.getMessage());

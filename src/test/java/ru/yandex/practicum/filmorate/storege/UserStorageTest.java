@@ -111,8 +111,4 @@ public class UserStorageTest {
         assertEquals(mutual.getId(), mutualFriends.iterator().next().getId());
     }
 
-    @Test
-    void shouldThrowExceptionWhenUserNotFound() {
-        assertThrows(NotFoundException.class, () -> userStorage.removeFriend(999, 1));
-    }
 }
