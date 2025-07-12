@@ -49,4 +49,12 @@ public class GlobalExceptionHandler {
                 .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .build();
     }
+
+    @ExceptionHandler(Exception.class)
+    public ErrorResponse handleException(Exception ex) {
+        return ErrorResponse
+                .builder(ex, HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage())
+                .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .build();
+    }
 }
