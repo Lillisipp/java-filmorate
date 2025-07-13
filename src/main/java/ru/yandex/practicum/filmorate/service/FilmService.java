@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -73,6 +74,12 @@ public class FilmService {
 
     public Collection<Film> topLikeFilm(int count) {
         return filmStorage.topLikeFilm(count);
+    }
+
+    public Film getFilmById(Integer id) {
+        return filmStorage
+                .getFilmById(id)
+                .orElseThrow(() -> new NotFoundException("Фильм с id = " + id + " не найден."));
     }
 }
 

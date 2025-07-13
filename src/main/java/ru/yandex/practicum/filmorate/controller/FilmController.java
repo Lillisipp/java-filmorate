@@ -53,5 +53,10 @@ public class FilmController {
         return filmService.topLikeFilm(count);
     }
 
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable Integer id) {
+        return filmService.getFilmById(id);
+    }
+
 
 }

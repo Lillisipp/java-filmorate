@@ -51,7 +51,13 @@ public class UserStorageTest {
 
     @Test
     void shouldGetUserById() {
-        User user = new User(null, "email@example.com", "login", "name", LocalDate.of(1990, 1, 1), Set.of());
+        User user = new User(
+                null,
+                "email@example.com",
+                "login",
+                "name",
+                LocalDate.of(1990, 1, 1),
+                Set.of());
         userStorage.save(user);
 
         var foundUser = userStorage.getUserById(user.getId());

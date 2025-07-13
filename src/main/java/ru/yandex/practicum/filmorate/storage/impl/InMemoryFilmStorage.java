@@ -20,12 +20,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilmById(int id) {
-        Film film = films.get(id);
-        if (film == null) {
-            throw new NotFoundException("Фильм с id = " + id + " не найден.");
-        }
-        return film;
+    public Optional<Film> getFilmById(Integer id) {
+        return Optional.ofNullable(films.get(id));
     }
 
     @Override
@@ -44,14 +40,16 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void likeFilm(int filmId, int userId) {
-        Film film = getFilmById(filmId);
+        Film film = getFilmById(filmId)
+                .orElseThrow(() -> new NotFoundException("Фильм с id = " + filmId + " не найден."));
         film.getLikes().add(userId);
     }
 
 
     @Override
     public void removeLikeFilm(int filmId, int userId) {
-        Film film = getFilmById(filmId);
+        Film film = getFilmById(filmId)
+                .orElseThrow(() -> new NotFoundException("Фильм с id = " + filmId + " не найден."));
         if (!film.getLikes().contains(userId)) {
             throw new ConditionsNotMetException("Лайк от пользователя не найден.");
         }

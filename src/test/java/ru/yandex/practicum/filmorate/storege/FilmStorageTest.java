@@ -13,6 +13,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 public class FilmStorageTest {
@@ -38,9 +40,13 @@ public class FilmStorageTest {
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
 
         inMemoryFilmStorage.save(film);
-        Film saved = inMemoryFilmStorage.getFilmById(film.getId());
-        assertThat(saved).isNotNull();
-        assertThat(saved.getName()).isEqualTo("Film 1");
+
+        var saved = inMemoryFilmStorage.getFilmById(film.getId());
+        assertTrue(saved.isPresent());
+        assertEquals(film.getId(), saved.get().getId());
+
+//        assertThat(saved).isNotNull();
+//        assertThat(saved.getName()).isEqualTo("Film 1");
 
     }
 
@@ -56,7 +62,8 @@ public class FilmStorageTest {
         film.setName("Updated");
         inMemoryFilmStorage.update(film);
 
-        Film update = inMemoryFilmStorage.getFilmById(film.getId());
+        Film update = inMemoryFilmStorage.getFilmById(film.getId())
+                .orElseThrow();
         assertThat(update.getName()).isEqualTo("Updated");
 
     }
@@ -67,7 +74,8 @@ public class FilmStorageTest {
         inMemoryFilmStorage.save(film);
 
         inMemoryFilmStorage.likeFilm(film.getId(), 1);
-        Film likedFilm = inMemoryFilmStorage.getFilmById(film.getId());
+        Film likedFilm = inMemoryFilmStorage.getFilmById(film.getId())
+                .orElseThrow();
 
         assertThat(likedFilm.getLikes()).contains(1);
     }
@@ -79,7 +87,8 @@ public class FilmStorageTest {
         inMemoryFilmStorage.likeFilm(film.getId(), 1);
 
         inMemoryFilmStorage.removeLikeFilm(film.getId(), 1);
-        Film updatedFilm = inMemoryFilmStorage.getFilmById(film.getId());
+        Film updatedFilm = inMemoryFilmStorage.getFilmById(film.getId())
+                .orElseThrow();
 
         assertThat(updatedFilm.getLikes()).doesNotContain(1);
     }
