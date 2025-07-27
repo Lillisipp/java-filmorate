@@ -39,4 +39,8 @@ public class Film {
     @JsonIgnore
     private Set<Integer> likes = new HashSet<>();
 
+    private Set<Genre> genres = new HashSet<>();
+
+    @NotNull
+    private MpaRating mpa;
 }

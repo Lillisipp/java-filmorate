@@ -18,6 +18,13 @@ public class UserService {
 
     private final UserStorage userStorage;
 
+    public void checkUserExists(Integer id) {
+        if (!userStorage.exist(id)) {
+            log.warn("Обновление отклонено: пользователь с ID {} не найден", id);
+            throw new NotFoundException("Пользователь с id = " + id + " не найден");
+        }
+    }
+
     public User createUser(User user) {
         log.info("Получен запрос на создание пользователя: {}", user);
         if (!StringUtils.hasText(user.getName())) {
@@ -48,12 +55,8 @@ public class UserService {
     public User addFriend(Integer id, Integer friendId) {
         checkUserExists(id);
         checkUserExists(friendId);
-        log.info("Пользователь {} добавил в друзья пользователя {}", id, friendId);
+        log.info("Пользователь {} отправил запрос в друзья пользователю {}", id, friendId);
         return userStorage.addFriend(id, friendId);
-    }
-
-    public void removeFriend(Integer id, Integer friendId) {
-        userStorage.removeFriend(id, friendId);
     }
 
     public Collection<User> getListFriends(Integer id) {
@@ -67,10 +70,17 @@ public class UserService {
         return userStorage.getMutualFriends(id, friendId);
     }
 
-    public void checkUserExists(Integer id) {
-        if (!userStorage.exist(id)) {
-            log.warn("Обновление отклонено: пользователь с ID {} не найден", id);
-            throw new NotFoundException("Пользователь с id = " + id + " не найден");
-        }
+    public void removeFriend(Integer id, Integer friendId) {
+        checkUserExists(id);
+        checkUserExists(friendId);
+        log.info("Пользователь {} удалил из друзей пользователя {}", id, friendId);
+        userStorage.removeFriend(id, friendId);
+    }
+
+    public User confirmFriendRequest(Integer id, Integer friendId) {
+        checkUserExists(id);
+        checkUserExists(friendId);
+        log.info("Пользователь {} подтвердил запрос в друзья от пользователя {}", id, friendId);
+        return userStorage.confirmFriendRequest(id, friendId);
     }
 }

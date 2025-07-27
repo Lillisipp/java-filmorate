@@ -25,4 +25,7 @@ public interface UserStorage {
     Collection<User> getListFriends(Integer id);
 
     Collection<User> getMutualFriends(Integer id, Integer friendId);
+
+    User confirmFriendRequest(Integer id, Integer friendId);
+
 }
