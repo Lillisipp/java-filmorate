@@ -62,18 +62,13 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void removeFriend(Integer id, Integer friendId) {
-        User user = users.get(id);
-        User friend = users.get(friendId);
+        User user = getUserById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"));
+        User friend = getUserById(friendId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + friendId + " не найден"));
 
-        getUserById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"))
-                .getFriends()
-                .removeIf(f -> f.getFriendId().equals(friendId));
-
-        getUserById(friendId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + friendId + " не найден"))
-                .getFriends()
-                .removeIf(f -> f.getFriendId().equals(id));
+        user.getFriends().removeIf(f -> f.getFriendId().equals(friendId));
+        friend.getFriends().removeIf(f -> f.getFriendId().equals(id));
     }
 
     @Override
