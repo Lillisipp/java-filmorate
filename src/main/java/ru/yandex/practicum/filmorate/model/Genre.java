@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @Data
 public class Genre {
     private Integer id;
-    private ru.yandex.practicum.filmorate.model.enums.Genre genre;
+    private Genre genre;
 }
