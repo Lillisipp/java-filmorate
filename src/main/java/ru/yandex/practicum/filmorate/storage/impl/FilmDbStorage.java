@@ -1,0 +1,95 @@
+package ru.yandex.practicum.filmorate.storage.impl;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.repository.mappers.FilmRowMapper;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+@Repository
+@RequiredArgsConstructor
+public class FilmDbStorage implements FilmStorage {
+    private final JdbcTemplate jdbc;
+    private final FilmRowMapper mapper;
+
+    private static final String FIND_ALL_QUERY = "SELECT * FROM films";
+    private static final String SAVE_FILM = "INSERT INTO films(name, description, releaseDate, duratifilm, mpaRating) VALUES (?,?,?,?,?)";
+    private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE film_id = ?";
+
+    @Override
+    public Collection<Film> getFilms() {
+        return jdbc.query(FIND_ALL_QUERY, mapper);
+    }
+
+    @Override
+    public Optional<Film> getFilmById(Integer id) {
+        try {
+            return Optional.ofNullable(jdbc.queryForObject(FIND_BY_ID_QUERY, mapper, id));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Film save(Film film) {
+        KeyHolder kh = new GeneratedKeyHolder();
+        jdbc.update(conn -> {
+            PreparedStatement ps = conn.prepareStatement(SAVE_FILM, new String[]{"film_id"});
+            ps.setString(1, film.getName());
+            ps.setString(2, film.getDescription());
+            ps.setDate(3, Date.valueOf(film.getReleaseDate()));
+            ps.setInt(4, (int) film.getDuration().toMinutes());
+            ps.setInt(4, film.getMpa().getId());
+            return ps;
+        }, kh);
+        film.setId(Objects.requireNonNull(kh.getKey()).intValue());
+
+        int newId = Objects.requireNonNull(kh.getKey()).intValue();
+        if (!film.getGenres().isEmpty()) {
+            String sqlGenre = "INSERT INTO film_genres(film_id, genre_id) VALUES (?,?)";
+            for (Genre g : film.getGenres()) {
+                jdbc.update(sqlGenre, newId, g.getId());
+            }
+        }
+        return film;
+    }
+
+
+    @Override
+    public Film update(Film newFilm) {
+        return null;
+    }
+
+    @Override
+    public void likeFilm(int filmId, int userId) {
+
+    }
+
+    @Override
+    public void removeLikeFilm(int filmId, int userId) {
+
+    }
+
+    @Override
+    public List<Film> topLikeFilm(int count) {
+        return List.of();
+    }
+
+    @Override
+    public boolean exist(Film film) {
+        return false;
+    }
+}

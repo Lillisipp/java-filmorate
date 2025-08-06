@@ -14,11 +14,18 @@ import java.util.Set;
 public class FilmDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer id;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String name;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String description;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDate releaseDate;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Duration duration;
-    private Set<Integer> likes = new HashSet<>();
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Set<Genre> genres = new HashSet<>();
+
+    private Set<Integer> likes = new HashSet<>();
+
     private MpaRating mpa;
 }

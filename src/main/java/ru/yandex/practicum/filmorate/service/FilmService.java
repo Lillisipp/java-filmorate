@@ -18,13 +18,13 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class FilmService {
 
-    private final FilmStorage filmStorage;
+    private final FilmStorage filmDbStorage;
     private final UserService userService;
 
     public Film addFilm(Film film) {
         log.debug("Создание нового фильма: {}", film);
         validateFilm(film);
-        filmStorage.save(film);
+        filmDbStorage.save(film);
         log.debug("Фильм добавлен с ID: {}", film.getId());
         return film;
     }
@@ -34,18 +34,18 @@ public class FilmService {
             log.warn("Обновление отменено — ID не указан.");
             throw new ConditionsNotMetException("Id должен быть указан.");
         }
-        if (!filmStorage.exist(updatedFilm)) {
+        if (!filmDbStorage.exist(updatedFilm)) {
             log.warn("Обновление отменено — фильм с ID {} не найден.", updatedFilm.getId());
             throw new ConditionsNotMetException("Фильм с таким ID не найден.");
         }
         validateFilm(updatedFilm);
-        filmStorage.update(updatedFilm);
+        filmDbStorage.update(updatedFilm);
         log.debug("Фильм с ID {} успешно обновлён.", updatedFilm.getId());
         return updatedFilm;
     }
 
     public Collection<Film> getFilms() {
-        return filmStorage.getFilms();
+        return filmDbStorage.getFilms();
     }
 
     private void validateFilm(Film film) {
@@ -62,22 +62,22 @@ public class FilmService {
 
     public void likeFilm(Integer filmId, Integer userId) {
         userService.checkUserExists(userId);
-        filmStorage.likeFilm(filmId, userId);
+        filmDbStorage.likeFilm(filmId, userId);
         log.info("Пользователь {} лайкнул фильм {}", userId, filmId);
     }
 
     public void removeLikeFilm(int filmId, int userId) {
         userService.checkUserExists(userId);
-        filmStorage.removeLikeFilm(filmId, userId);
+        filmDbStorage.removeLikeFilm(filmId, userId);
         log.info("Пользователь {} удалил лайк с фильма {}", userId, filmId);
     }
 
     public Collection<Film> topLikeFilm(int count) {
-        return filmStorage.topLikeFilm(count);
+        return filmDbStorage.topLikeFilm(count);
     }
 
     public Film getFilmById(Integer id) {
-        return filmStorage
+        return filmDbStorage
                 .getFilmById(id)
                 .orElseThrow(() -> new NotFoundException("Фильм с id = " + id + " не найден."));
     }
