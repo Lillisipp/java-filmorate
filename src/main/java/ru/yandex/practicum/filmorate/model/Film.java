@@ -19,7 +19,6 @@ import java.util.Set;
 @Data
 public class Film {
 
-
     private Integer id;
 
     @NotBlank(message = "Название не может быть пустым")

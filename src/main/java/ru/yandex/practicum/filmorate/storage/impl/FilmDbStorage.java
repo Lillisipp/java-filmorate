@@ -26,28 +26,32 @@ public class FilmDbStorage implements FilmStorage {
     private final FilmRowMapper mapper;
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM films";
-    private static final String SAVE_FILM = "INSERT INTO films(name, description, releaseDate, duratifilm, mpaRating) VALUES (?,?,?,?,?)";
+    private static final String SAVE_FILM =
+            "INSERT INTO films(name, description, release_date, duration_min, mpa_id) VALUES (?,?,?,?,?)";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE film_id = ?";
     private static final String UPDATE_BY_FILM = """
             UPDATE films
-            SET name=?,
-             description=?,
-             releaseDate=?,
-             duratifilm=?,
-             mpaRating=?
+               SET name=?,
+                   description=?,
+                   release_date=?,
+                   duration_min=?,
+                   mpa_id=?
              WHERE film_id=?
             """;
-    private static final String LIKE_FILM = "INSERT INTO film_likesfilm_id, user_id) VALUES (?,?)";
-    private static final String REMOVE_LIKE = "DELETE From film_likesfilm_id WHERE film_id=? AND user_id=?";
+    private static final String LIKE_FILM =
+            "INSERT INTO film_likes(film_id, user_id) VALUES (?,?)";
+    private static final String REMOVE_LIKE =
+            "DELETE FROM film_likes WHERE film_id=? AND user_id=?";
     private static final String GET_TOP_LIKE_FILM = """
-SELECT f.* FROM films f
-LEFT JOIN film_likes l ON f.film_id = l.film_id
+            SELECT f.*
+              FROM films f
+              LEFT JOIN film_likes l ON f.film_id = l.film_id
              GROUP BY f.film_id
              ORDER BY COUNT(l.user_id) DESC
              LIMIT ?
-""";
-    private static final String CHECK_EXIST = "SELECT COUNT(*) FROM films WHERE film_id = ?";
-
+            """;
+    private static final String CHECK_EXIST =
+            "SELECT COUNT(*) FROM films WHERE film_id = ?";
 
     @Override
     public Collection<Film> getFilms() {

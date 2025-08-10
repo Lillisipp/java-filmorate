@@ -1,6 +1,6 @@
 -- 1. Таблица пользователей
-CREATE TABLE users (
-  user_id     INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+create table if not exists users (
+  user_id     serial PRIMARY KEY,
   email       VARCHAR(255)      NOT NULL UNIQUE,
   login       VARCHAR(255)      NOT NULL UNIQUE,
   name        VARCHAR(255)      NOT NULL,
@@ -8,20 +8,20 @@ CREATE TABLE users (
 );
 
 -- 2. Справочник MPA-рейтингов
-CREATE TABLE mpa_rating (
-  mpa_id      INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+create table if not exists mpa_rating (
+  mpa_id      serial PRIMARY KEY,
   name        VARCHAR(20)       NOT NULL UNIQUE  -- 'G','PG','PG-13','R','NC-17'
 );
 
 -- 3. Справочник жанров
-CREATE TABLE genres (
-  genre_id    INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+create table if not exists genres (
+  genre_id    serial PRIMARY KEY,
   name        VARCHAR(50)       NOT NULL UNIQUE  -- 'ACTION','COMEDY',...
 );
 
 -- 4. Таблица фильмов
-CREATE TABLE films (
-  film_id       INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+create table if not exists films (
+  film_id       serial PRIMARY KEY,
   name          VARCHAR(255)      NOT NULL,
   description   VARCHAR(200)      NOT NULL,
   release_date  DATE              NOT NULL,
@@ -31,31 +31,31 @@ CREATE TABLE films (
 );
 
 -- 5. Many-to-many фильм↔жанр
-CREATE TABLE film_genres (
-  film_id     INTEGER NOT NULL,
-  genre_id    INTEGER NOT NULL,
-  PRIMARY KEY (film_id, genre_id),
-  FOREIGN KEY (film_id)  REFERENCES films   (film_id),
-  FOREIGN KEY (genre_id) REFERENCES genres  (genre_id)
+create table if not exists film_genres (
+  film_id     int not null,
+  genre_id    int not null,
+  primary key (film_id, genre_id),
+  foreign key (film_id)  references films   (film_id),
+  foreign key (genre_id) references genres  (genre_id)
 );
 
 -- 6. Таблица дружбы пользователей
-CREATE TABLE friendships (
-  user_id       INTEGER NOT NULL,
-  friend_id     INTEGER NOT NULL,
-  status        VARCHAR(12) NOT NULL,        -- 'UNCONFIRMED' или 'CONFIRMED'
-  requested_at  TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY   (user_id, friend_id),
-  FOREIGN KEY (user_id)   REFERENCES users (user_id),
-  FOREIGN KEY (friend_id) REFERENCES users (user_id)
+create table if not exists friendships (
+  user_id       int not null,
+  friend_id     int not null,
+  status        varchar(12) not null,        -- 'UNCONFIRMED' или 'CONFIRMED'
+  requested_at  timestamp   default current_timestamp,
+  primary key   (user_id, friend_id),
+  foreign key (user_id)   references users (user_id),
+  foreign key (friend_id) references users (user_id)
 );
 
 -- 7. Таблица лайков фильмов
-CREATE TABLE film_likes (
-  user_id    INTEGER   NOT NULL,
-  film_id    INTEGER   NOT NULL,
-  liked_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (user_id, film_id),
-  FOREIGN KEY (user_id) REFERENCES users (user_id),
-  FOREIGN KEY (film_id) REFERENCES films (film_id)
+create table if not exists film_likes (
+  user_id    int   not null,
+  film_id    int   not null,
+  liked_at   timestamp default current_timestamp,
+  primary key (user_id, film_id),
+  foreign key (user_id) references users (user_id),
+  foreign key (film_id) references films (film_id)
 );

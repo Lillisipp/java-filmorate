@@ -11,7 +11,7 @@ public class FriendshipRowMapper implements RowMapper<Friendship> {
     @Override
     public Friendship mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new Friendship(
-                rs.getInt("friendId"),
+                rs.getInt("friend_id"),
                 FriendshipStatus.valueOf(rs.getString("status"))
         );
     }

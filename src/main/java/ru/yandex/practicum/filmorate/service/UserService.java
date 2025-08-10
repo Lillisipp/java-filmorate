@@ -1,18 +1,16 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.UserRepository;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.impl.UserDbStorage;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -20,74 +18,91 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final UserDbStorage userDbStorage;
 
     public void checkUserExists(Integer id) {
-        if (!userRepository.exist(id)) {
+        if (!userDbStorage.exist(id)) {
             log.warn("Обновление отклонено: пользователь с ID {} не найден", id);
             throw new NotFoundException("Пользователь с id = " + id + " не найден");
         }
     }
 
-    public User createUser(User user) {
+    public UserDto createUser(User user) {
         log.info("Получен запрос на создание пользователя: {}", user);
         if (!StringUtils.hasText(user.getName())) {
             user.setName(user.getLogin());
         }
-        userRepository.save(user);
+        User save = userDbStorage.save(user);
         log.info("Пользователь создан с ID: {}", user.getId());
-        return user;
+        return UserMapper.mapToUserDto(save);
     }
 
-    public User updateUser(User updateUser) {
-
+    public UserDto updateUser(User updateUser) {
         checkUserExists(updateUser.getId());
-        userRepository.update(updateUser);
+        User user = userDbStorage.update(updateUser);
 
         log.info("Пользователь с ID {} успешно обновлён", updateUser.getId());
-        return updateUser;
+        return UserMapper.mapToUserDto(user);
     }
 
-    public Collection<User> getUsers() {
-        return userRepository.findAll()
+    public Collection<UserDto> getUsers() {
+        return userDbStorage
+                .getUsers()
                 .stream()
                 .map(UserMapper::mapToUserDto)
-                .collect(Collectors.toCollection());
+                .toList();
     }
 
-    public Optional<User> getUserById(Integer id) {
-        return userRepository.getUserById(id);
+    public UserDto getUserById(Integer id) {
+        User user = userDbStorage
+                .getUserById(id)         // Optional<User>
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"));
+        return UserMapper.mapToUserDto(user);
     }
 
-    public User addFriend(Integer id, Integer friendId) {
+    public void deleteUser(Integer id) {
+        checkUserExists(id);
+        userDbStorage.delete(userDbStorage.getUserById(id).orElseThrow());
+        log.info("Пользователь с ID {} удалён", id);
+    }
+
+    public UserDto addFriend(Integer id, Integer friendId) {
         checkUserExists(id);
         checkUserExists(friendId);
         log.info("Пользователь {} отправил запрос в друзья пользователю {}", id, friendId);
-        return userRepository.addFriend(id, friendId);
+        User us =userDbStorage.addFriend(id, friendId);
+        return UserMapper.mapToUserDto(us);
     }
 
-    public Collection<User> getListFriends(Integer id) {
+    public Collection<UserDto> getListFriends(Integer id) {
         checkUserExists(id);
-        return userRepository.getListFriends(id);
+        return userDbStorage.getListFriends(id)
+                .stream()
+                .map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
-    public Collection<User> getMutualFriends(Integer id, Integer friendId) {
+    public Collection<UserDto> getMutualFriends(Integer id, Integer friendId) {
         checkUserExists(id);
         checkUserExists(friendId);
-        return userRepository.getMutualFriends(id, friendId);
+        return userDbStorage.getMutualFriends(id, friendId)
+                .stream()
+                .map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
     public void removeFriend(Integer id, Integer friendId) {
         checkUserExists(id);
         checkUserExists(friendId);
         log.info("Пользователь {} удалил из друзей пользователя {}", id, friendId);
-        userRepository.removeFriend(id, friendId);
+        userDbStorage.removeFriend(id, friendId);
     }
 
-    public User confirmFriendRequest(Integer id, Integer friendId) {
+    public UserDto confirmFriendRequest(Integer id, Integer friendId) {
         checkUserExists(id);
         checkUserExists(friendId);
         log.info("Пользователь {} подтвердил запрос в друзья от пользователя {}", id, friendId);
-        return userRepository.confirmFriendRequest(id, friendId);
+        User user=userDbStorage.confirmFriendRequest(id, friendId);
+        return UserMapper.mapToUserDto(user);
     }
 }
