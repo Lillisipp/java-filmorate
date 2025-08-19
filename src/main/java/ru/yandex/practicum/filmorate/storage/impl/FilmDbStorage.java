@@ -29,7 +29,7 @@ import java.util.Optional;
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbc;
     private final FilmRowMapper mapper;
-    private final GenreRowMapper mapperGener;
+    private final GenreRowMapper mapperGenre;
     private final MpaRatingRowMapper mapperMpa;
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM films";
@@ -145,21 +145,18 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Genre> getGeners() {
-        return jdbc.query(GET_GENRES, mapperGener);
+    public List<Genre> getGenres() {
+        return jdbc.query(GET_GENRES, mapperGenre);
     }
 
     @Override
-    public Optional<Genre> getGenerById(int id) {
-        return jdbc.query(GET_GENRES_BY_ID, mapperGener, id)
+    public Optional<Genre> getGenreById(int id) {
+        return jdbc.query(GET_GENRES_BY_ID, mapperGenre, id)
                 .stream().findFirst();
-
     }
 
     @Override
-    public List<MpaRating> getMpa() {
-        return jdbc.query(GET_MPA, mapperMpa);
-    }
+    public List<MpaRating> getMpa() { return jdbc.query(GET_MPA, mapperMpa); }
 
     @Override
     public Optional<MpaRating> getMPAById(int id) {
@@ -167,13 +164,4 @@ public class FilmDbStorage implements FilmStorage {
                 .stream()
                 .findFirst();
     }
-
-//    public List<Genre> findByFilmId(int filmId) {
-//        String sql = """
-//            SELECT g.genre_id, g.name
-//              FROM film_genres fg JOIN genres g ON g.genre_id=fg.genre_id
-//             WHERE fg.film_id=? ORDER BY g.genre_id
-//        """;
-//        return jdbc.query(sql, mapper, filmId);
-//    }
 }

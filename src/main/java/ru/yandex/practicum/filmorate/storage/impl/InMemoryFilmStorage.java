@@ -73,12 +73,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Genre> getGeners() {
+    public List<Genre> getGenres() {
         return List.of();
     }
 
     @Override
-    public Optional<Genre> getGenerById(int id) {
+    public Optional<Genre> getGenreById(int id) {
         return Optional.empty();
     }
 

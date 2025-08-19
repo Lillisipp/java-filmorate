@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Slf4j
@@ -69,6 +70,27 @@ public class FilmService {
             log.warn("Ошибка валидации: дата релиза слишком ранняя: {}", film.getReleaseDate());
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года.");
         }
+        if (film.getMpa() == null || film.getMpa().getId() == null) {
+            throw new ValidationException("MPA должен быть указан.");
+        }
+        if (filmDbStorage.getMPAById(film.getMpa().getId()).isEmpty()) {
+            throw new NotFoundException("MPA id=" + film.getMpa().getId() + " не найден");
+        }
+
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            LinkedHashSet<Integer> genreIds = new LinkedHashSet<>();
+            for (Genre g : film.getGenres()) {
+                if (g == null || g.getId() == null) {
+                    throw new ValidationException("Каждый жанр должен содержать корректный id.");
+                }
+                genreIds.add(g.getId());
+            }
+            for (Integer gid : genreIds) {
+                if (filmDbStorage.getGenreById(gid).isEmpty()) {
+                    throw new NotFoundException("Жанр id=" + gid + " не найден");
+                }
+            }
+        }
     }
 
     public void likeFilm(Integer filmId, Integer userId) {
@@ -102,11 +124,11 @@ public class FilmService {
     }
 
     public List<Genre> getGenres() {
-        return filmDbStorage.getGeners();
+        return filmDbStorage.getGenres();
     }
 
     public Genre getGenreById(Integer id) {
-        return filmDbStorage.getGenerById(id)
+        return filmDbStorage.getGenreById(id)
                 .orElseThrow(() -> new NotFoundException("Жанр id=" + id + " не найден"));
     }
 

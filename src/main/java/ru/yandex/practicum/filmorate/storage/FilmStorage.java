@@ -26,9 +26,9 @@ public interface FilmStorage {
 
     boolean exist(Film film);
 
-    List<Genre> getGeners();
+    List<Genre> getGenres();
 
-    Optional<Genre> getGenerById(int id);
+    Optional<Genre> getGenreById(int id);
 
     List<MpaRating> getMpa();
 

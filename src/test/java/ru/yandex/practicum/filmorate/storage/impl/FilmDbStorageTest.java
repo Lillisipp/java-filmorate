@@ -132,8 +132,8 @@ class FilmDbStorageTest {
 
     @Test
     @DisplayName("getGeners: возвращает все жанры в порядке id")
-    void getGeners_All() {
-        List<Genre> genres = filmDbStorage.getGeners();
+    void getGenres_All() {
+        List<Genre> genres = filmDbStorage.getGenres();
         assertThat(genres).hasSize(6);
         assertThat(genres.get(0).getId()).isEqualTo(1);
         assertThat(genres.get(0).getType().getName()).isEqualTo("Комедия");
@@ -142,8 +142,8 @@ class FilmDbStorageTest {
 
     @Test
     @DisplayName("getGenerById: находит жанр по id")
-    void getGenerById_returnsOne() {
-        var opt = filmDbStorage.getGenerById(2);
+    void getGenreById_returnsOne() {
+        var opt = filmDbStorage.getGenreById(2);
         assertThat(opt).isPresent();
         assertThat(opt.get().getType().name()).isEqualTo("DRAMA");
     }
