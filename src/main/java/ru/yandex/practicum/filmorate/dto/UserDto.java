@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
@@ -32,10 +31,9 @@ public class UserDto {
     @Pattern(regexp = "^\\S*$", message = "Логин не может быть пустым и содержать пробелы.")
     private String login;
     private String name;
+
     @PastOrPresent(message = "Дата рождения не может быть в будущем.")
     private LocalDate birthday;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-//    @JsonIgnore
     private Set<Friendship> friends = new HashSet<>();
 
 }
