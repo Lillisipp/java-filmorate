@@ -9,4 +9,8 @@ public class Utils {
                 .max()
                 .orElse(0) + 1;
     }
+
+    public static String normalize(String s) {
+        return s == null ? null : s.trim().toLowerCase();
+    }
 }

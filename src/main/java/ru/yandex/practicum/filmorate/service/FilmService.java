@@ -9,12 +9,15 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.impl.UserDbStorage;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -24,27 +27,29 @@ public class FilmService {
     private final FilmStorage filmDbStorage;
     private final UserService userService;
 
-    public FilmDto addFilm(Film film) {
-        log.debug("Создание нового фильма: {}", film);
-        validateFilm(film);
+    public FilmDto addFilm(FilmDto dto) {
+        log.debug("Создание нового фильма: {}", dto);
+        validateFilm(dto);
+        Film film = FilmMapper.mapToFilm(dto);
         filmDbStorage.save(film);
-        log.debug("Фильм добавлен с ID: {}", film.getId());
+        log.debug("Фильм добавлен с ID: {}", dto.getId());
         return FilmMapper.mapToFilmDto(film);
     }
 
-    public FilmDto updateFilm(Film updatedFilm) {
+    public FilmDto updateFilm(FilmDto updatedFilm) {
         if (updatedFilm.getId() == null) {
             log.warn("Обновление отменено — ID не указан.");
             throw new ConditionsNotMetException("Id должен быть указан.");
         }
-        if (!filmDbStorage.exist(updatedFilm)) {
+        validateFilm(updatedFilm);
+        Film updated = FilmMapper.mapToFilm(updatedFilm);
+        if (!filmDbStorage.exist(updated)) {
             log.warn("Обновление отменено — фильм с ID {} не найден.", updatedFilm.getId());
             throw new ConditionsNotMetException("Фильм с таким ID не найден.");
         }
-        validateFilm(updatedFilm);
-        filmDbStorage.update(updatedFilm);
+        filmDbStorage.update(updated);
         log.debug("Фильм с ID {} успешно обновлён.", updatedFilm.getId());
-        return FilmMapper.mapToFilmDto(updatedFilm);
+        return FilmMapper.mapToFilmDto(updated);
     }
 
     public Collection<FilmDto> getFilms() {
@@ -55,7 +60,7 @@ public class FilmService {
                 .toList();
     }
 
-    private void validateFilm(Film film) {
+    private void validateFilm(FilmDto film) {
         if (film.getDuration().compareTo(Duration.ZERO) <= 0) {
             log.warn("Ошибка валидации: продолжительность не положительная: {}", film.getDuration());
             throw new ValidationException("Продолжительность фильма должна быть положительным числом.");
@@ -95,6 +100,24 @@ public class FilmService {
                 .getFilmById(id)
                 .map(FilmMapper::mapToFilmDto)
                 .orElseThrow(() -> new NotFoundException("Фильм с id = " + id + " не найден."));
+    }
+
+    public List<Genre> getGenres() {
+        return filmDbStorage.getGeners();
+    }
+
+    public Genre getGenreById(Integer id) {
+        return filmDbStorage.getGenerById(id)
+                .orElseThrow(() -> new NotFoundException("Жанр id=" + id + " не найден"));
+    }
+
+    public List<MpaRating> getMpa() {
+        return filmDbStorage.getMpa();
+    }
+
+    public MpaRating getMPAById(Integer id) {
+        return filmDbStorage.getMPAById(id)
+                .orElseThrow(() -> new NotFoundException("MPA id=" + id + " не найден"));
     }
 }
 

@@ -27,22 +27,25 @@ public class UserService {
         }
     }
 
-    public UserDto createUser(User user) {
-        log.info("Получен запрос на создание пользователя: {}", user);
-        if (!StringUtils.hasText(user.getName())) {
-            user.setName(user.getLogin());
+    public UserDto createUser(UserDto dto) {
+        log.info("Получен запрос на создание пользователя: {}", dto);
+        if (!StringUtils.hasText(dto.getName())) {
+            dto.setName(dto.getLogin());
         }
-        User save = userDbStorage.save(user);
-        log.info("Пользователь создан с ID: {}", user.getId());
-        return UserMapper.mapToUserDto(save);
+        User user = UserMapper.mapToUser(dto);
+        User saved = userDbStorage.save(user);
+        log.info("Пользователь создан с ID: {}", dto.getId());
+        return UserMapper.mapToUserDto(saved);
     }
 
-    public UserDto updateUser(User updateUser) {
+    public UserDto updateUser(UserDto updateUser) {
         checkUserExists(updateUser.getId());
-        User user = userDbStorage.update(updateUser);
+
+        User user = UserMapper.mapToUser(updateUser);
+        User updated = userDbStorage.update(user);
 
         log.info("Пользователь с ID {} успешно обновлён", updateUser.getId());
-        return UserMapper.mapToUserDto(user);
+        return UserMapper.mapToUserDto(updated);
     }
 
     public Collection<UserDto> getUsers() {
@@ -55,7 +58,7 @@ public class UserService {
 
     public UserDto getUserById(Integer id) {
         User user = userDbStorage
-                .getUserById(id)         // Optional<User>
+                .getUserById(id)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"));
         return UserMapper.mapToUserDto(user);
     }
@@ -70,7 +73,7 @@ public class UserService {
         checkUserExists(id);
         checkUserExists(friendId);
         log.info("Пользователь {} отправил запрос в друзья пользователю {}", id, friendId);
-        User us =userDbStorage.addFriend(id, friendId);
+        User us = userDbStorage.addFriend(id, friendId);
         return UserMapper.mapToUserDto(us);
     }
 
@@ -102,7 +105,7 @@ public class UserService {
         checkUserExists(id);
         checkUserExists(friendId);
         log.info("Пользователь {} подтвердил запрос в друзья от пользователя {}", id, friendId);
-        User user=userDbStorage.confirmFriendRequest(id, friendId);
+        User user = userDbStorage.confirmFriendRequest(id, friendId);
         return UserMapper.mapToUserDto(user);
     }
 }

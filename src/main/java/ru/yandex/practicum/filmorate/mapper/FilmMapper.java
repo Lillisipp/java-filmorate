@@ -1,22 +1,35 @@
 package ru.yandex.practicum.filmorate.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.HashSet;
 
+@UtilityClass
 public class FilmMapper {
 
-    public static FilmDto mapToFilmDto(Film film) {
-        FilmDto fDto = new FilmDto();
-        fDto.setId(film.getId());
-        fDto.setName(film.getName());
-        fDto.setDescription(film.getDescription());
-        fDto.setReleaseDate(film.getReleaseDate());
-        fDto.setDuration(film.getDuration());
-        fDto.setGenres(new HashSet<>(film.getGenres()));
-        fDto.setLikes(new HashSet<>(film.getLikes()));
-        fDto.setMpa(film.getMpa());
-        return fDto;
+    public FilmDto mapToFilmDto(Film film) {
+        return new FilmDto()
+                .setId(film.getId())
+                .setName(film.getName())
+                .setDescription(film.getDescription())
+                .setReleaseDate(film.getReleaseDate())
+                .setGenres(new HashSet<>(film.getGenres()))
+                .setDuration(film.getDuration())
+                .setLikes(new HashSet<>(film.getLikes()))
+                .setMpa(film.getMpa());
+    }
+
+    public Film mapToFilm(FilmDto dto) {
+        return new Film()
+                .setId(dto.getId())
+                .setName(dto.getName())
+                .setDescription(dto.getDescription())
+                .setReleaseDate(dto.getReleaseDate())
+                .setGenres(new HashSet<>(dto.getGenres()))
+                .setDuration(dto.getDuration())
+                .setLikes(new HashSet<>(dto.getLikes()))
+                .setMpa(dto.getMpa());
     }
 }

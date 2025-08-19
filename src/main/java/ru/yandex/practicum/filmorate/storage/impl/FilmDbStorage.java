@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -9,7 +10,10 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.repository.mappers.FilmRowMapper;
+import ru.yandex.practicum.filmorate.repository.mappers.GenreRowMapper;
+import ru.yandex.practicum.filmorate.repository.mappers.MpaRatingRowMapper;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.Date;
@@ -21,9 +25,12 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
+@Qualifier("dbStorage")
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbc;
     private final FilmRowMapper mapper;
+    private final GenreRowMapper mapperGener;
+    private final MpaRatingRowMapper mapperMpa;
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM films";
     private static final String SAVE_FILM =
@@ -44,14 +51,18 @@ public class FilmDbStorage implements FilmStorage {
             "DELETE FROM film_likes WHERE film_id=? AND user_id=?";
     private static final String GET_TOP_LIKE_FILM = """
             SELECT f.*
-              FROM films f
-              LEFT JOIN film_likes l ON f.film_id = l.film_id
-             GROUP BY f.film_id
-             ORDER BY COUNT(l.user_id) DESC
+            FROM films f LEFT JOIN film_likes l ON f.film_id = l.film_id
+            GROUP BY f.film_id
+            ORDER BY COUNT(l.user_id) DESC
              LIMIT ?
             """;
     private static final String CHECK_EXIST =
             "SELECT COUNT(*) FROM films WHERE film_id = ?";
+
+    private static final String GET_GENRES = "SELECT genre_id, name FROM genres ORDER BY genre_id";
+    private static final String GET_GENRES_BY_ID = "SELECT genre_id, name FROM genres WHERE genre_id=?";
+    private static final String GET_MPA_BY_ID = "SELECT mpa_id, name FROM mpa_rating WHERE mpa_id=?";
+    private static final String GET_MPA = "SELECT mpa_id, name FROM mpa_rating ORDER BY mpa_id";
 
     @Override
     public Collection<Film> getFilms() {
@@ -76,7 +87,7 @@ public class FilmDbStorage implements FilmStorage {
             ps.setString(2, film.getDescription());
             ps.setDate(3, Date.valueOf(film.getReleaseDate()));
             ps.setInt(4, (int) film.getDuration().toMinutes());
-            ps.setInt(4, film.getMpa().getId());
+            ps.setInt(5, film.getMpa().getId());
             return ps;
         }, kh);
         film.setId(Objects.requireNonNull(kh.getKey()).intValue());
@@ -104,7 +115,7 @@ public class FilmDbStorage implements FilmStorage {
         if (rows == 0) {
             throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
         }
-        jdbc.update("DELETE FROM film_genres WHERE film_id = ?", newFilm.getId(), newFilm.getId());
+        jdbc.update("DELETE FROM film_genres WHERE film_id = ?", newFilm.getId());//, newFilm.getId());
         for (Genre g : newFilm.getGenres()) {
             jdbc.update("INSERT INTO film_genres(film_id, genre_id) VALUES (?,?)",
                     newFilm.getId(), g.getId());
@@ -115,7 +126,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void likeFilm(int filmId, int userId) {
         jdbc.update(LIKE_FILM, filmId, userId);
-
     }
 
     @Override
@@ -130,7 +140,40 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public boolean exist(Film film) {
-        Integer count = jdbc.queryForObject(CHECK_EXIST, Integer.class, film);
+        Integer count = jdbc.queryForObject(CHECK_EXIST, Integer.class, film.getId());
         return count != null && count > 0;
     }
+
+    @Override
+    public List<Genre> getGeners() {
+        return jdbc.query(GET_GENRES, mapperGener);
+    }
+
+    @Override
+    public Optional<Genre> getGenerById(int id) {
+        return jdbc.query(GET_GENRES_BY_ID, mapperGener, id)
+                .stream().findFirst();
+
+    }
+
+    @Override
+    public List<MpaRating> getMpa() {
+        return jdbc.query(GET_MPA, mapperMpa);
+    }
+
+    @Override
+    public Optional<MpaRating> getMPAById(int id) {
+        return jdbc.query(GET_MPA_BY_ID, mapperMpa, id)
+                .stream()
+                .findFirst();
+    }
+
+//    public List<Genre> findByFilmId(int filmId) {
+//        String sql = """
+//            SELECT g.genre_id, g.name
+//              FROM film_genres fg JOIN genres g ON g.genre_id=fg.genre_id
+//             WHERE fg.film_id=? ORDER BY g.genre_id
+//        """;
+//        return jdbc.query(sql, mapper, filmId);
+//    }
 }

@@ -4,10 +4,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/films")
@@ -17,12 +19,12 @@ public class FilmController {
     private final FilmService filmService;
 
     @PostMapping
-    public FilmDto addFilm(@Valid @RequestBody Film film) {
+    public FilmDto addFilm(@Valid @RequestBody FilmDto film) {
         return filmService.addFilm(film);
     }
 
     @PutMapping
-    public FilmDto updateFilm(@Valid @RequestBody Film newFilm) {
+    public FilmDto updateFilm(@Valid @RequestBody FilmDto newFilm) {
         return filmService.updateFilm(newFilm);
     }
 
@@ -59,5 +61,23 @@ public class FilmController {
         return filmService.getFilmById(id);
     }
 
+    @GetMapping("/genres")
+    public List<Genre> getGenres() {
+        return filmService.getGenres();
+    }
 
+    @GetMapping("/genres/{id}")
+    public Genre getGenreById(@PathVariable Integer id) {
+        return filmService.getGenreById(id);
+    }
+
+    @GetMapping("/mpa")
+    public List<MpaRating> getMPA() {
+        return filmService.getMpa();
+    }
+
+    @GetMapping("/mpa/{id}")
+    public MpaRating getMPAById(@PathVariable Integer id) {
+        return filmService.getMPAById(id);
+    }
 }

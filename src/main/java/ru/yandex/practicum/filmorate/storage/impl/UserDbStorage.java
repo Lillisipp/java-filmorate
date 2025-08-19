@@ -35,7 +35,7 @@ public class UserDbStorage implements UserStorage {
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
     private static final String CREATE_USER = "INSERT INTO users(email,login,name,birthday) VALUES (?,?,?,?)";
-    private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
+    private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE user_id = ?";
     private static final String UPDATE_BY_ID = """
                 UPDATE users
                    SET email    = ?,
@@ -56,9 +56,9 @@ public class UserDbStorage implements UserStorage {
             select u.*
             from users u
             join friendships f1 on u.user_id=f1.friend_id AND f1.user_id=? and f1.status='CONFIRMED'
-            join friendships f2 on u.user_id=f2.friend_id AND u.user_id=? and STATUS='CONFIRMED'
+            join friendships f2 on u.user_id = f2.friend_id and f2.user_id = ? and f2.status = 'CONFIRMED'
             """;
-    private static final String DELETE_FRIEND = "DELETE FROM Friendships WHERE friend_id = ? AND user_id = ?)";
+    private static final String DELETE_FRIEND = "DELETE FROM friendships WHERE user_id = ? AND friend_id = ?";
     private static final String CONFIRMATION_FRIEND = """
             UPDATE friendships
             SET STATUS = 'CONFIRMED'
@@ -66,7 +66,14 @@ public class UserDbStorage implements UserStorage {
                 AND friend_id = ?
                 AND status = 'UNCONFIRMED'
                         """;
-    private static final String CONFIRM_FRIEND = "INSERT INTO riendships(user_id, friend_id, status) VALUES (?, ?, 'CONFIRMED')";
+    private static final String CONFIRM_FRIEND = """
+
+            INSERT INTO friendships(user_id, friend_id, status)
+            SELECT ?, ?, 'CONFIRMED'
+            WHERE NOT EXISTS (
+                SELECT 1 FROM friendships WHERE user_id = ? AND friend_id = ?
+            )
+             """;
 
 
     @Override
@@ -121,7 +128,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User addFriend(Integer id, Integer friendId) {
-        if (exist(id) || exist(friendId)) {
+        if (!exist(id) || !exist(friendId)) {
             throw new NotFoundException("Пользователь не найден");
         }
         jdbc.update(ADD_FRIEND, id, friendId, "UNCONFIRMED");
@@ -150,7 +157,7 @@ public class UserDbStorage implements UserStorage {
         if (rows == 0) {
             throw new NotFoundException("Запрос в друзья не найден");
         }
-        jdbc.update(CONFIRM_FRIEND, id, friendId);
+        jdbc.update(CONFIRM_FRIEND, friendId, id, friendId, id);
         return getUserById(id).orElseThrow();
     }
 }

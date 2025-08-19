@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.UserDto;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
@@ -17,12 +16,12 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserDto createUser(@Valid @RequestBody User user) {
+    public UserDto createUser(@Valid @RequestBody UserDto user) {
         return userService.createUser(user);
     }
 
     @PutMapping
-    public UserDto updateUser(@Valid @RequestBody User newUser) {
+    public UserDto updateUser(@Valid @RequestBody UserDto newUser) {
         return userService.updateUser(newUser);
     }
 
