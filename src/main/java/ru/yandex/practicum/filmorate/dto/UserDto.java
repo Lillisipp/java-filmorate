@@ -20,7 +20,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Accessors(chain = true)
 public class UserDto {
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+
     private Integer id;
 
     @Email(regexp = ".*@.*", message = "Электронная почта должна содержать символ '@'.")
