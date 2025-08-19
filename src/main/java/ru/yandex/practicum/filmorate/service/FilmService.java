@@ -28,6 +28,7 @@ public class FilmService {
     private final UserService userService;
 
     public FilmDto addFilm(FilmDto dto) {
+
         log.debug("Создание нового фильма: {}", dto);
         validateFilm(dto);
         Film film = FilmMapper.mapToFilm(dto);
@@ -41,13 +42,20 @@ public class FilmService {
             log.warn("Обновление отменено — ID не указан.");
             throw new ConditionsNotMetException("Id должен быть указан.");
         }
-        validateFilm(updatedFilm);
-        Film updated = FilmMapper.mapToFilm(updatedFilm);
-        if (!filmDbStorage.exist(updated)) {
-            log.warn("Обновление отменено — фильм с ID {} не найден.", updatedFilm.getId());
-            throw new ConditionsNotMetException("Фильм с таким ID не найден.");
+
+        Film existing = filmDbStorage.getFilmById(updatedFilm.getId())
+                .orElseThrow(() -> new ConditionsNotMetException("Фильм с таким ID не найден."));
+
+        if (updatedFilm.getMpa() == null || updatedFilm.getMpa().getId() == null) {
+            updatedFilm.setMpa(existing.getMpa());
         }
-        filmDbStorage.update(updated);
+        if (updatedFilm.getGenres() == null) {
+            updatedFilm.setGenres(existing.getGenres());
+        }
+        validateFilm(updatedFilm);
+        Film toUpdate = FilmMapper.mapToFilm(updatedFilm);
+        Film updated = filmDbStorage.update(toUpdate);
+//        filmDbStorage.update(updatedFilm);
         log.debug("Фильм с ID {} успешно обновлён.", updatedFilm.getId());
         return FilmMapper.mapToFilmDto(updated);
     }
@@ -70,12 +78,16 @@ public class FilmService {
             log.warn("Ошибка валидации: дата релиза слишком ранняя: {}", film.getReleaseDate());
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года.");
         }
-        if (film.getMpa() == null || film.getMpa().getId() == null) {
-            throw new ValidationException("MPA должен быть указан.");
+
+        if (film.getMpa() != null && film.getMpa().getId() != null) {
+            filmDbStorage.getMPAById(film.getMpa().getId())
+                    .orElseThrow(() -> new NotFoundException("MPA id=" + film.getMpa().getId() + " не найден"));
         }
-        if (filmDbStorage.getMPAById(film.getMpa().getId()).isEmpty()) {
-            throw new NotFoundException("MPA id=" + film.getMpa().getId() + " не найден");
-        }
+
+//        if (filmDbStorage.getMPAById(film.getMpa().getId()).isEmpty()) {
+//            filmDbStorage.getMPAById(film.getMpa().getId())
+//                    .orElseThrow(() -> new NotFoundException("MPA id=" + film.getMpa().getId() + " не найден"));
+//        }
 
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             LinkedHashSet<Integer> genreIds = new LinkedHashSet<>();

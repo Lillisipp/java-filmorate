@@ -41,7 +41,6 @@ public class FilmServiceTest {
         dto.setDuration(Duration.ofMinutes(100));
         dto.setReleaseDate(LocalDate.of(2000, 1, 1));
 
-        // save(...) вернёт тот же Film, что получил
         when(filmStorage.save(any(Film.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
@@ -106,19 +105,20 @@ public class FilmServiceTest {
         expected.setDuration(Duration.ofMinutes(120));
         expected.setReleaseDate(LocalDate.of(2000, 1, 1));
 
-        // мок статических методов маппера
         try (MockedStatic<FilmMapper> mapper = Mockito.mockStatic(FilmMapper.class)) {
             mapper.when(() -> FilmMapper.mapToFilm(dto)).thenReturn(mapped);
             mapper.when(() -> FilmMapper.mapToFilmDto(updated)).thenReturn(expected);
 
-            when(filmStorage.exist(mapped)).thenReturn(true);
+            when(filmStorage.getFilmById(1)).thenReturn(Optional.of(new Film()));
+
             when(filmStorage.update(mapped)).thenReturn(updated);
 
             FilmDto result = filmService.updateFilm(dto);
 
             assertEquals(expected, result);
-            verify(filmStorage).exist(mapped);
+            verify(filmStorage).getFilmById(1);
             verify(filmStorage).update(mapped);
+            verifyNoMoreInteractions(filmStorage);
         }
     }
 
