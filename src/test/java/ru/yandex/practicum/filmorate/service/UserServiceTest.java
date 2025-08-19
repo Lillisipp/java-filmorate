@@ -116,43 +116,6 @@ public class UserServiceTest {
         verify(userStorage).addFriend(1, 2);
     }
 
-//    @Test
-//    void removeFriend_success() {
-//        // Arrange: создаём двух «существующих» пользователей
-//        User user1 = new User(
-//                1,
-//                "u1@mail.com",
-//                "login1",
-//                "User One",
-//                LocalDate.of(1990, 1, 1),
-//                new HashSet<>()
-//        );
-//        User user2 = new User(
-//                2,
-//                "u2@mail.com",
-//                "login2",
-//                "User Two",
-//                LocalDate.of(1991, 2, 2),
-//                new HashSet<>()
-//        );
-//
-//        // Мокаем получение пользователей
-//        when(userStorage.getUserById(1)).thenReturn(Optional.of(user1));
-//        when(userStorage.getUserById(2)).thenReturn(Optional.of(user2));
-//
-//        // Мокаем удаление в хранилище
-//        doNothing().when(userStorage).removeFriend(1, 2);
-//
-//        // Act
-//        userService.removeFriend(1, 2);
-//
-//        // Assert: проверяем, что метод проверки существования вызван для обоих пользователей
-//        verify(userStorage, times(1)).getUserById(1);
-//        verify(userStorage, times(1)).getUserById(2);
-//        // и что удаление было передано в хранилище
-//        verify(userStorage, times(1)).removeFriend(1, 2);
-//    }
-
 
     @Test
     void testGetListFriends() {
