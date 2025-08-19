@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(FilmController.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class FilmControllerTest {
-    private final MpaRating DEFAULT_MPA = new MpaRating(1, MPA.G);
+    private final MpaRating defaultMpa = new MpaRating(1, MPA.G);
     @Autowired
     private MockMvc mockMvc;
 
@@ -52,7 +52,7 @@ class FilmControllerTest {
                 Duration.ofMinutes(148),
                 Set.of(),
                 Set.of(),
-                DEFAULT_MPA
+                defaultMpa
         );
 
         FilmDto resp = new FilmDto(
@@ -63,7 +63,7 @@ class FilmControllerTest {
                 Duration.ofMinutes(148),
                 Set.of(),
                 new HashSet<>(),
-                DEFAULT_MPA
+                defaultMpa
         );
 
         when(filmService.addFilm(any(FilmDto.class))).thenReturn(resp);
@@ -92,7 +92,7 @@ class FilmControllerTest {
                 Duration.ofMinutes(148),
                 Set.of(),
                 Set.of(),
-                DEFAULT_MPA
+                defaultMpa
         );
 
         mockMvc.perform(post("/films")
@@ -113,7 +113,7 @@ class FilmControllerTest {
                 Duration.ofMinutes(169),
                 Set.of(),
                 Set.of(),
-                DEFAULT_MPA
+                defaultMpa
 
         );
 
@@ -151,7 +151,7 @@ class FilmControllerTest {
                 Duration.ofMinutes(120),
                 Set.of(),
                 Set.of(),
-                DEFAULT_MPA
+                defaultMpa
         );
 
         when(filmService.updateFilm(any(FilmDto.class)))
@@ -175,7 +175,7 @@ class FilmControllerTest {
                 Duration.ofMinutes(120),
                 Set.of(),
                 Set.of(),
-                DEFAULT_MPA
+                defaultMpa
         );
         FilmDto film2 = new FilmDto(
                 2,
@@ -185,7 +185,7 @@ class FilmControllerTest {
                 Duration.ofMinutes(90),
                 Set.of(),
                 Set.of(),
-                DEFAULT_MPA
+                defaultMpa
         );
         when(filmService.getFilms()).thenReturn(List.of(film1, film2));
 
@@ -210,7 +210,7 @@ class FilmControllerTest {
                 Duration.ofMinutes(50),
                 Set.of(),
                 Set.of(),
-                DEFAULT_MPA
+                defaultMpa
         );
 
         when(filmService.addFilm(any(FilmDto.class))).thenReturn(film);
@@ -234,7 +234,7 @@ class FilmControllerTest {
                 Duration.ofMinutes(120),
                 Set.of(),
                 Set.of(),
-                DEFAULT_MPA
+                defaultMpa
         );
 
         when(filmService.addFilm(film)).thenReturn(film);
