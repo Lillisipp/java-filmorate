@@ -156,7 +156,9 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<MpaRating> getMpa() { return jdbc.query(GET_MPA, mapperMpa); }
+    public List<MpaRating> getMpa() {
+        return jdbc.query(GET_MPA, mapperMpa);
+    }
 
     @Override
     public Optional<MpaRating> getMPAById(int id) {
