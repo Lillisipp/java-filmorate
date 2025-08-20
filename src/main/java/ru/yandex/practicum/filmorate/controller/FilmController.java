@@ -4,12 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @RequestMapping("/films")
@@ -59,25 +56,5 @@ public class FilmController {
     @GetMapping("/{id}")
     public FilmDto getFilmById(@PathVariable Integer id) {
         return filmService.getFilmById(id);
-    }
-
-    @GetMapping("/genres")
-    public List<Genre> getGenres() {
-        return filmService.getGenres();
-    }
-
-    @GetMapping("/genres/{id}")
-    public Genre getGenreById(@PathVariable Integer id) {
-        return filmService.getGenreById(id);
-    }
-
-    @GetMapping("/mpa")
-    public List<MpaRating> getMPA() {
-        return filmService.getMpa();
-    }
-
-    @GetMapping("/mpa/{id}")
-    public MpaRating getMPAById(@PathVariable Integer id) {
-        return filmService.getMPAById(id);
     }
 }
