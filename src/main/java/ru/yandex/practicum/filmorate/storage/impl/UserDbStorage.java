@@ -34,7 +34,6 @@ public class UserDbStorage implements UserStorage {
     }
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
-    private static final String CREATE_USER = "INSERT INTO users(email,login,name,birthday) VALUES (?,?,?,?)";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE user_id = ?";
     private static final String UPDATE_BY_ID = """
                 UPDATE users
@@ -46,34 +45,38 @@ public class UserDbStorage implements UserStorage {
             """;
     private static final String DELETE_USER_BY_ID = "DELETE FROM users WHERE user_id = ?";
     private static final String CHECK_EXIST = "SELECT COUNT(*) FROM users WHERE user_id = ?";
-    private static final String ADD_FRIEND = "INSERT INTO friendships(user_id, friend_id, status) VALUES(?,?,?)";
+    private static final String ADD_FRIEND = "INSERT INTO friendships(user_id, friend_id) VALUES(?,?)";
     private static final String GET_FRIENDS = """
-            SELECT u.*
-            FROM friendships f JOIN users u ON u.user_id=f.friend_id
-            WHERE f.user_id=? and STATUS='CONFIRMED'
+                    SELECT u.*
+                    FROM friendships f JOIN users u ON u.user_id=f.friend_id
+                    WHERE f.user_id=?
+            ORDER BY u.user_id
             """;
     private static final String MUTUAL_FRIENDS = """
-            select u.*
-            from users u
-            join friendships f1 on u.user_id=f1.friend_id AND f1.user_id=? and f1.status='CONFIRMED'
-            join friendships f2 on u.user_id = f2.friend_id and f2.user_id = ? and f2.status = 'CONFIRMED'
+            select distinct u.*
+            from friendships f1
+            join friendships f2 on f1.friend_id = f2.friend_id
+            join users u on u.user_id = f1.friend_id
+            where f1.user_id = ? and f2.user_id = ?
+            ORDER BY u.user_id
             """;
     private static final String DELETE_FRIEND = "DELETE FROM friendships WHERE user_id = ? AND friend_id = ?";
-    private static final String CONFIRMATION_FRIEND = """
-            UPDATE friendships
-            SET STATUS = 'CONFIRMED'
-               WHERE user_id = ?
-                AND friend_id = ?
-                AND status = 'UNCONFIRMED'
-                        """;
-    private static final String CONFIRM_FRIEND = """
+//    private static final String CONFIRMATION_FRIEND = """
+//            UPDATE friendships
+//            SET STATUS = 'CONFIRMED'
+//               WHERE user_id = ?
+//                AND friend_id = ?
+//                AND status = 'UNCONFIRMED'
+//                        """;
+//    двустороняя дружба(подтвержденная) не нужна на яндексе
 
-            INSERT INTO friendships(user_id, friend_id, status)
-            SELECT ?, ?, 'CONFIRMED'
-            WHERE NOT EXISTS (
-                SELECT 1 FROM friendships WHERE user_id = ? AND friend_id = ?
-            )
-             """;
+//    private static final String CONFIRM_FRIEND = """
+//            INSERT INTO friendships(user_id, friend_id, status)
+//            SELECT ?, ?, 'CONFIRMED'
+//            WHERE NOT EXISTS (
+//                SELECT 1 FROM friendships WHERE user_id = ? AND friend_id = ?
+//            )
+//             """;
 
 
     @Override
@@ -131,7 +134,7 @@ public class UserDbStorage implements UserStorage {
         if (!exist(id) || !exist(friendId)) {
             throw new NotFoundException("Пользователь не найден");
         }
-        jdbc.update(ADD_FRIEND, id, friendId, "UNCONFIRMED");
+        jdbc.update(ADD_FRIEND, id, friendId);
         return getUserById(id).orElseThrow();
     }
 
@@ -151,13 +154,13 @@ public class UserDbStorage implements UserStorage {
         return jdbc.query(MUTUAL_FRIENDS, mapper, id, friendId);
     }
 
-    @Override
-    public User confirmFriendRequest(Integer id, Integer friendId) {
-        int rows = jdbc.update(CONFIRMATION_FRIEND, id, friendId);
-        if (rows == 0) {
-            throw new NotFoundException("Запрос в друзья не найден");
-        }
-        jdbc.update(CONFIRM_FRIEND, friendId, id, friendId, id);
-        return getUserById(id).orElseThrow();
-    }
+//    @Override
+//    public User confirmFriendRequest(Integer id, Integer friendId) {
+//        int rows = jdbc.update(CONFIRMATION_FRIEND, id, friendId);
+//        if (rows == 0) {
+//            throw new NotFoundException("Запрос в друзья не найден");
+//        }
+//        jdbc.update(CONFIRM_FRIEND, friendId, id, friendId, id);
+//        return getUserById(id).orElseThrow();
+//    }
 }

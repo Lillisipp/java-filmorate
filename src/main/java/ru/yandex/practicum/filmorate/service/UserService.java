@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.impl.UserDbStorage;
@@ -34,11 +36,14 @@ public class UserService {
         }
         User user = UserMapper.mapToUser(dto);
         User saved = userDbStorage.save(user);
-        log.info("Пользователь создан с ID: {}", dto.getId());
+        log.info("Пользователь создан с ID: {}", saved.getId());
         return UserMapper.mapToUserDto(saved);
     }
 
     public UserDto updateUser(UserDto updateUser) {
+        if (updateUser.getId() == null) {
+            throw new ConditionsNotMetException("Id должен быть указан.");
+        }
         checkUserExists(updateUser.getId());
 
         User user = UserMapper.mapToUser(updateUser);
@@ -70,9 +75,12 @@ public class UserService {
     }
 
     public UserDto addFriend(Integer id, Integer friendId) {
+        if (id.equals(friendId)){
+            throw new ValidationException("Нельзя добавить себя в друзья.");
+        }
         checkUserExists(id);
         checkUserExists(friendId);
-        log.info("Пользователь {} отправил запрос в друзья пользователю {}", id, friendId);
+        log.info("Пользователь {} добавил в друзья пользователя {}", id, friendId);
         User us = userDbStorage.addFriend(id, friendId);
         return UserMapper.mapToUserDto(us);
     }
@@ -101,11 +109,4 @@ public class UserService {
         userDbStorage.removeFriend(id, friendId);
     }
 
-    public UserDto confirmFriendRequest(Integer id, Integer friendId) {
-        checkUserExists(id);
-        checkUserExists(friendId);
-        log.info("Пользователь {} подтвердил запрос в друзья от пользователя {}", id, friendId);
-        User user = userDbStorage.confirmFriendRequest(id, friendId);
-        return UserMapper.mapToUserDto(user);
-    }
 }

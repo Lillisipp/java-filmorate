@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.impl.UserDbStorage;
@@ -69,13 +70,12 @@ public class UserServiceTest {
                 LocalDate.of(2000, 1, 1),
                 new HashSet<>());
 
-
-        NotFoundException ex = assertThrows(
-                NotFoundException.class,
+        ConditionsNotMetException ex = assertThrows(
+                ConditionsNotMetException.class,
                 () -> userService.updateUser(user)
         );
 
-        assertEquals("Пользователь с id = null не найден", ex.getMessage());
+        assertEquals("Id должен быть указан.", ex.getMessage());
 
         verify(userDbStorage, never()).update(any());
     }

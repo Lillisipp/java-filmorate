@@ -55,7 +55,6 @@ public class FilmService {
         validateFilm(updatedFilm);
         Film toUpdate = FilmMapper.mapToFilm(updatedFilm);
         Film updated = filmDbStorage.update(toUpdate);
-//        filmDbStorage.update(updatedFilm);
         log.debug("Фильм с ID {} успешно обновлён.", updatedFilm.getId());
         return FilmMapper.mapToFilmDto(updated);
     }

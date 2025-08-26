@@ -32,5 +32,5 @@ public interface FilmStorage {
 
     List<MpaRating> getMpa();
 
-    Optional<MpaRating>  getMPAById(int id);
+    Optional<MpaRating> getMPAById(int id);
 }

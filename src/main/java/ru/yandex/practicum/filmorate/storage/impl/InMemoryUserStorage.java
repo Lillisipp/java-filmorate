@@ -80,7 +80,6 @@ public class InMemoryUserStorage implements UserStorage {
         return user
                 .getFriends()
                 .stream()
-                .filter(friendship -> friendship.getStatus() == FriendshipStatus.UNCONFIRMED)
                 .map(users::get)
                 .toList();
     }
@@ -93,29 +92,27 @@ public class InMemoryUserStorage implements UserStorage {
             return Collections.emptyList();
         }
         Set<Integer> confirmedFriends = user.getFriends().stream()
-                .filter(f -> f.getStatus() == FriendshipStatus.CONFIRMED)
                 .map(Friendship::getFriendId)
                 .collect(Collectors.toSet());
 
         return other.getFriends().stream()
-                .filter(f -> f.getStatus() == FriendshipStatus.CONFIRMED && confirmedFriends.contains(f.getFriendId()))
                 .map(f -> users.get(f.getFriendId()))
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public User confirmFriendRequest(Integer id, Integer friendId) {
-        User user = users.get(id);
-        User friend = users.get(friendId);
-        if (friend == null || user == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-        friend.getFriends().stream()
-                .filter(f -> f.getFriendId().equals(id) && f.getStatus() == FriendshipStatus.UNCONFIRMED)
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Запрос в друзья не найден"))
-                .setStatus(FriendshipStatus.CONFIRMED);
-        user.getFriends().add(new Friendship(friendId, FriendshipStatus.CONFIRMED));
-        return user;
-    }
+//    @Override
+//    public User confirmFriendRequest(Integer id, Integer friendId) {
+//        User user = users.get(id);
+//        User friend = users.get(friendId);
+//        if (friend == null || user == null) {
+//            throw new NotFoundException("Пользователь не найден");
+//        }
+//        friend.getFriends().stream()
+//                .filter(f -> f.getFriendId().equals(id) && f.getStatus() == FriendshipStatus.UNCONFIRMED)
+//                .findFirst()
+//                .orElseThrow(() -> new NotFoundException("Запрос в друзья не найден"))
+//                .setStatus(FriendshipStatus.CONFIRMED);
+//        user.getFriends().add(new Friendship(friendId, FriendshipStatus.CONFIRMED));
+//        return user;
+//    }
 }

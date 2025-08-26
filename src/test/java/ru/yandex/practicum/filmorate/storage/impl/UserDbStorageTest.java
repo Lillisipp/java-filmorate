@@ -96,52 +96,17 @@ class UserDbStorageTest {
         );
     }
 
-    @Test
-    @DisplayName("addFriend: в getListFriends до подтверждения пусто (возвращает только CONFIRMED)")
-    void addFriend_then_list_is_empty_until_confirm() {
-        var a = userDbStorage.save(newUser("a1@mail.com", "a1", "A1")); // requester
-        var b = userDbStorage.save(newUser("b1@mail.com", "b1", "B1")); // target
-
-        userDbStorage.addFriend(a.getId(), b.getId()); // создаёт UNCONFIRMED a->b
-
-        // getListFriends возвращает только CONFIRMED — значит, до подтверждения пусто
-        var friendsOfA = userDbStorage.getListFriends(a.getId());
-        var friendsOfB = userDbStorage.getListFriends(b.getId());
-
-        assertAll(
-                () -> assertThat(friendsOfA).isEmpty(),
-                () -> assertThat(friendsOfB).isEmpty()
-        );
-    }
 
     @Test
-    @DisplayName("confirmFriendRequest подтверждает заявку: после — друг появляется у инициатора (и опционально у получателя)")
-    void confirm_friend_request() {
-        var requester = userDbStorage.save(newUser("req@mail.com", "req", "Requester")); // инициатор
-        var target    = userDbStorage.save(newUser("tgt@mail.com", "tgt", "Target"));    // получатель
-
-        userDbStorage.addFriend(requester.getId(), target.getId());           // запись requester -> target, UNCONFIRMED
-        userDbStorage.confirmFriendRequest(requester.getId(), target.getId()); // подтверждаем именно (requester, target)
-
-        var friendsOfRequester = userDbStorage.getListFriends(requester.getId());
-        assertThat(friendsOfRequester).extracting("id").containsExactly(target.getId());
-
-        var friendsOfTarget = userDbStorage.getListFriends(target.getId());
-        assertThat(friendsOfTarget).extracting("id").containsExactly(requester.getId());
-    }
-
-    @Test
-    @DisplayName("getMutualFriends: общий подтверждённый друг возвращается")
+    @DisplayName("getMutualFriends: общий друг возвращается")
     void mutual_friends() {
         var a = userDbStorage.save(newUser("a2@mail.com", "a2", "A2"));
         var b = userDbStorage.save(newUser("b2@mail.com", "b2", "B2"));
         var c = userDbStorage.save(newUser("c2@mail.com", "c2", "C2")); // общий
 
-        userDbStorage.addFriend(c.getId(), a.getId());
-        userDbStorage.confirmFriendRequest(c.getId(), a.getId());
+        userDbStorage.addFriend(a.getId(), c.getId());
 
-        userDbStorage.addFriend(c.getId(), b.getId());
-        userDbStorage.confirmFriendRequest(c.getId(), b.getId());
+        userDbStorage.addFriend(b.getId(), c.getId());
 
         var mutual = userDbStorage.getMutualFriends(a.getId(), b.getId());
         assertThat(mutual).extracting("id").containsExactly(c.getId());
@@ -154,7 +119,6 @@ class UserDbStorageTest {
         var u2 = userDbStorage.save(newUser("r2@mail.com", "r2", "R2"));
 
         userDbStorage.addFriend(u2.getId(), u1.getId());
-        userDbStorage.confirmFriendRequest(u2.getId(), u1.getId());
 
         userDbStorage.removeFriend(u1.getId(), u2.getId());
 

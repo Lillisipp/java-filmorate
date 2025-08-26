@@ -43,14 +43,6 @@ public class UserController {
         return userService.addFriend(id, friendId);
     }
 
-    @PutMapping("/{id}/friends/{friendId}/confirm")
-    public UserDto confirmFriend(
-            @PathVariable Integer id,
-            @PathVariable Integer friendId
-    ) {
-        return userService.confirmFriendRequest(id, friendId);
-    }
-
     @DeleteMapping("/{id}/friends/{friendId}")
     public void removeFriend(
             @PathVariable Integer id,

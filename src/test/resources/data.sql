@@ -45,9 +45,9 @@ MERGE INTO film_genres (film_id, genre_id) KEY(film_id, genre_id) VALUES
   (2, 2);  -- Film Two: Драма
 
 -- ДРУЖБА (односторонняя заявка)
-MERGE INTO friendships (user_id, friend_id, status) KEY(user_id, friend_id) VALUES
-  (1, 2, 'UNCONFIRMED'),
-  (3, 1, 'UNCONFIRMED');
+MERGE INTO friendships (user_id, friend_id) KEY(user_id, friend_id) VALUES
+  (1, 2),
+  (3, 1);
 
 -- ЛАЙКИ ФИЛЬМОВ
 MERGE INTO film_likes (user_id, film_id) KEY(user_id, film_id) VALUES

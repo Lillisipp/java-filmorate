@@ -43,7 +43,6 @@ create table if not exists film_genres (
 create table if not exists friendships (
   user_id       int not null,
   friend_id     int not null,
-  status        varchar(12) not null,        -- 'UNCONFIRMED' или 'CONFIRMED'
   requested_at  timestamp   default current_timestamp,
   primary key   (user_id, friend_id),
   foreign key (user_id)   references users (user_id),

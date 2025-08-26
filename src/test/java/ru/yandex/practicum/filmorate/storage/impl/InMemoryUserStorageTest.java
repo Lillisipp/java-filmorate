@@ -116,15 +116,10 @@ public class InMemoryUserStorageTest {
         userStorage.save(user1);
         userStorage.save(user2);
         userStorage.save(mutual);
-        // user1 отправил запрос mutual и mutual подтвердил
+
         userStorage.addFriend(user1.getId(), mutual.getId());
-        userStorage.confirmFriendRequest(mutual.getId(), user1.getId());
-
-        // user2 отправил запрос mutual и mutual подтвердил
         userStorage.addFriend(user2.getId(), mutual.getId());
-        userStorage.confirmFriendRequest(mutual.getId(), user2.getId());
 
-        // теперь mutual в статусе CONFIRMED у обоих
         Collection<User> mutualFriends =
                 userStorage.getMutualFriends(user1.getId(), user2.getId());
 
@@ -133,5 +128,4 @@ public class InMemoryUserStorageTest {
                 mutualFriends.iterator().next().getId(),
                 "Общий друг — это mutual");
     }
-
 }
