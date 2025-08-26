@@ -75,7 +75,7 @@ public class UserService {
     }
 
     public UserDto addFriend(Integer id, Integer friendId) {
-        if (id.equals(friendId)){
+        if (id.equals(friendId)) {
             throw new ValidationException("Нельзя добавить себя в друзья.");
         }
         checkUserExists(id);
