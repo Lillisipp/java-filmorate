@@ -1,20 +1,29 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.MpaRating;
+import ru.yandex.practicum.filmorate.model.enums.MPA;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,33 +32,68 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(FilmController.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class FilmControllerTest {
-
+    private final MpaRating defaultMpa = new MpaRating(1, MPA.G);
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private FilmService filmService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
     void testAddFilmSuccess() throws Exception {
-        Film film = new Film();
-        film.setName("Inception");
-        film.setDescription("A sci-fi movie about dreams.");
-        film.setDuration(Duration.ofMinutes(148));
-        film.setReleaseDate(LocalDate.of(2010, 7, 16));
+        FilmDto film = new FilmDto(
+                null,
+                "Inception",
+                "A sci-fi movie about dreams.",
+                LocalDate.of(2010, 7, 16),
+                Duration.ofMinutes(148),
+                Set.of(),
+                Set.of(),
+                defaultMpa
+        );
+
+        FilmDto resp = new FilmDto(
+                1,
+                "Inception",
+                "A sci-fi movie about dreams.",
+                LocalDate.of(2010, 7, 16),
+                Duration.ofMinutes(148),
+                Set.of(),
+                new HashSet<>(),
+                defaultMpa
+        );
+
+        when(filmService.addFilm(any(FilmDto.class))).thenReturn(resp);
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film)))
                 .andExpect(status().isOk())
                 .andDo(print())
+                .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.name", is("Inception")))
-                .andExpect(jsonPath("$.description", is("A sci-fi movie about dreams.")));
+                .andExpect(jsonPath("$.description", is("A sci-fi movie about dreams.")))
+                .andExpect(jsonPath("$.releaseDate", is("2010-07-16")))
+                .andExpect(jsonPath("$.duration", is(148)))
+                .andDo(print());
     }
 
     @Test
     void testAddFilmValidationErrorEmptyName() throws Exception {
-        Film film = new Film(1, " ", "abbb", LocalDate.of(2010, 7, 16), Duration.ofMinutes(148));
+        FilmDto film = new FilmDto(
+                1,
+                " ",
+                "abbb",
+                LocalDate.of(2010, 7, 16),
+                Duration.ofMinutes(148),
+                Set.of(),
+                Set.of(),
+                defaultMpa
+        );
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -61,11 +105,19 @@ class FilmControllerTest {
 
     @Test
     void testUpdateFilmSuccess() throws Exception {
-        Film film = new Film();
-        film.setName("Interstellar");
-        film.setDescription("A sci-fi movie about space.");
-        film.setDuration(Duration.ofMinutes(169));
-        film.setReleaseDate(LocalDate.of(2014, 11, 7));
+        FilmDto film = new FilmDto(
+                null,
+                "Interstellar",
+                "A sci‑fi movie about space.",
+                LocalDate.of(2014, 11, 7),
+                Duration.ofMinutes(169),
+                Set.of(),
+                Set.of(),
+                defaultMpa
+
+        );
+
+        when(filmService.updateFilm(film)).thenReturn(film);
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -91,12 +143,19 @@ class FilmControllerTest {
 
     @Test
     void testUpdateFilmNotFound() throws Exception {
-        Film updatedFilm = new Film();
-        updatedFilm.setId(1);
-        updatedFilm.setName("Non-existent Film");
-        updatedFilm.setDescription("This film does not exist.");
-        updatedFilm.setDuration(Duration.ofMinutes(120));
-        updatedFilm.setReleaseDate(LocalDate.of(2000, 1, 1));
+        FilmDto updatedFilm = new FilmDto(
+                1,
+                "Non-existent Film",
+                "This film does not exist.",
+                LocalDate.of(2000, 1, 1),
+                Duration.ofMinutes(120),
+                Set.of(),
+                Set.of(),
+                defaultMpa
+        );
+
+        when(filmService.updateFilm(any(FilmDto.class)))
+                .thenThrow(new NotFoundException("Фильм с таким ID не найден."));
 
         mockMvc.perform(put("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -106,23 +165,30 @@ class FilmControllerTest {
     }
 
     @Test
-    void testGetFilm() throws Exception {
+    void testGetFilms() throws Exception {
         // Создаём два фильма
-        Film film1 = new Film(1, "Film 1", "Description 1", LocalDate.of(2000, 1, 1), Duration.ofMinutes(120));
-        Film film2 = new Film(2, "Film 2", "Description 2", LocalDate.of(2010, 5, 10), Duration.ofMinutes(90));
+        FilmDto film1 = new FilmDto(
+                1,
+                "Film 1",
+                "Description 1",
+                LocalDate.of(2000, 1, 1),
+                Duration.ofMinutes(120),
+                Set.of(),
+                Set.of(),
+                defaultMpa
+        );
+        FilmDto film2 = new FilmDto(
+                2,
+                "Film 2",
+                "Description 2",
+                LocalDate.of(2010, 5, 10),
+                Duration.ofMinutes(90),
+                Set.of(),
+                Set.of(),
+                defaultMpa
+        );
+        when(filmService.getFilms()).thenReturn(List.of(film1, film2));
 
-        // Добавляем фильмы в коллекцию
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(film1)))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(film2)))
-                .andExpect(status().isOk());
-
-        // Проверяем получение всех фильмов
         mockMvc.perform(get("/films")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -135,12 +201,19 @@ class FilmControllerTest {
     }
 
     @Test
-    void testCreateFilmReleaseDateExactly1895_12_28() throws Exception {
-        Film film = new Film();
-        film.setName("Первый фильм");
-        film.setDescription("Исторический фильм, ровно на дату первого показа.");
-        film.setReleaseDate(LocalDate.of(1895, 12, 28)); // Ровно 28 декабря 1895 года
-        film.setDuration(Duration.ofMinutes(50)); // 50 минут
+    void testCreateFilmReleaseDate() throws Exception {
+        FilmDto film = new FilmDto(
+                null,
+                "Первый фильм",
+                "Исторический фильм, ровно на дату первого показа.",
+                LocalDate.of(1895, 12, 28),
+                Duration.ofMinutes(50),
+                Set.of(),
+                Set.of(),
+                defaultMpa
+        );
+
+        when(filmService.addFilm(any(FilmDto.class))).thenReturn(film);
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -153,11 +226,18 @@ class FilmControllerTest {
     void testCreateFilmDescriptionExactly200Characters() throws Exception {
         String description = "a".repeat(200); // Ровно 200 символов
 
-        Film film = new Film();
-        film.setName("Фильм с длинным описанием");
-        film.setDescription(description);
-        film.setReleaseDate(LocalDate.of(2000, 1, 1)); // Любая допустимая дата
-        film.setDuration(Duration.ofMinutes(120)); // 120 минут
+        FilmDto film = new FilmDto(
+                null,
+                "Фильм с длинным описанием",
+                description,
+                LocalDate.of(2000, 1, 1),
+                Duration.ofMinutes(120),
+                Set.of(),
+                Set.of(),
+                defaultMpa
+        );
+
+        when(filmService.addFilm(film)).thenReturn(film);
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)

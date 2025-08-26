@@ -1,19 +1,24 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.filmorate.controller.UserController;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -26,16 +31,21 @@ class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private UserService userService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
     void testCreateUserSuccess() throws Exception {
-        User user = new User();
+        UserDto user = new UserDto();
         user.setEmail("test@example.com");
         user.setLogin("testuser");
         user.setName("Test User");
         user.setBirthday(LocalDate.of(2000, 1, 1));
+
+        when(userService.createUser(user)).thenReturn(user);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -48,7 +58,7 @@ class UserControllerTest {
 
     @Test
     void testCreateUserValidationErrorInvalidEmail() throws Exception {
-        User user = new User();
+        UserDto user = new UserDto();
         user.setEmail("invalidemail");
         user.setLogin("testuser");
         user.setName("Test User");
@@ -63,11 +73,13 @@ class UserControllerTest {
 
     @Test
     void testUpdateUserSuccess() throws Exception {
-        User user = new User();
+        UserDto user = new UserDto();
         user.setEmail("test@example.com");
         user.setLogin("testuser");
         user.setName("Test User");
         user.setBirthday(LocalDate.of(2000, 1, 1));
+
+        when(userService.updateUser(any(UserDto.class))).thenReturn(user);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,46 +105,41 @@ class UserControllerTest {
 
     @Test
     void testUpdateUserNotFound() throws Exception {
-        User updatedUser = new User();
+        UserDto updatedUser = new UserDto();
         updatedUser.setId(1);
         updatedUser.setEmail("updated@example.com");
         updatedUser.setLogin("updateduser");
         updatedUser.setName("Updated User");
         updatedUser.setBirthday(LocalDate.of(1995, 5, 15));
 
+        when(userService.updateUser(any(UserDto.class)))
+                .thenThrow(new NotFoundException("Пользователь с таким ID не найден."));
+
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedUser)))
                 .andExpect(status().isNotFound())
                 .andDo(print())
-                .andExpect(jsonPath("$.detail", containsString("Пользователь с таким ID не найден.")));
+                .andExpect(jsonPath("$.detail").value("Пользователь с таким ID не найден."));
     }
 
     @Test
     void testGetAllUsers() throws Exception {
-        User user1 = new User();
+        UserDto user1 = new UserDto();
         user1.setId(1);
         user1.setEmail("user1@example.com");
         user1.setLogin("user1");
         user1.setName("User One");
         user1.setBirthday(LocalDate.of(1990, 1, 1));
 
-        User user2 = new User();
+        UserDto user2 = new UserDto();
         user2.setId(2);
         user2.setEmail("user2@example.com");
         user2.setLogin("user2");
         user2.setName("User Two");
         user2.setBirthday(LocalDate.of(1995, 5, 5));
 
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user1)))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user2)))
-                .andExpect(status().isOk());
+        when(userService.getUsers()).thenReturn(List.of(user1, user2));
 
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
@@ -143,7 +150,7 @@ class UserControllerTest {
 
     @Test
     void testErrorBirthdayInFuture() throws Exception {
-        User user = new User();
+        UserDto user = new UserDto();
         user.setEmail("test@example.com");
         user.setLogin("testuser");
         user.setName("Test User");
@@ -159,7 +166,7 @@ class UserControllerTest {
 
     @Test
     void testErrorLoginWithSpaces() throws Exception {
-        User user = new User();
+        UserDto user = new UserDto();
         user.setEmail("test@example.com");
         user.setLogin("invalid login"); // Логин с пробелами
         user.setName("Test User");
