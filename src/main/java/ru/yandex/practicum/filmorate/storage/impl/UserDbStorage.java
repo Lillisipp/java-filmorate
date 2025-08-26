@@ -45,12 +45,12 @@ public class UserDbStorage implements UserStorage {
             """;
     private static final String DELETE_USER_BY_ID = "DELETE FROM users WHERE user_id = ?";
     private static final String CHECK_EXIST = "SELECT COUNT(*) FROM users WHERE user_id = ?";
-    private static final String ADD_FRIEND = "INSERT INTO friendships(user_id, friend_id) VALUES(?,?)";
+    private static final String ADD_FRIEND = "INSERT INTO friendships(user_id, friend_id) VALUES(?,?) ";
     private static final String GET_FRIENDS = """
                     SELECT u.*
                     FROM friendships f JOIN users u ON u.user_id=f.friend_id
                     WHERE f.user_id=?
-            ORDER BY u.user_id
+                    ORDER BY u.user_id
             """;
     private static final String MUTUAL_FRIENDS = """
             select distinct u.*
@@ -60,7 +60,10 @@ public class UserDbStorage implements UserStorage {
             where f1.user_id = ? and f2.user_id = ?
             ORDER BY u.user_id
             """;
-    private static final String DELETE_FRIEND = "DELETE FROM friendships WHERE user_id = ? AND friend_id = ?";
+    private static final String DELETE_FRIEND = """
+            DELETE FROM friendships
+            WHERE user_id = ? AND friend_id = ?
+            """;
 //    private static final String CONFIRMATION_FRIEND = """
 //            UPDATE friendships
 //            SET STATUS = 'CONFIRMED'
@@ -141,7 +144,6 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void removeFriend(Integer id, Integer friendId) {
         jdbc.update(DELETE_FRIEND, id, friendId);
-        jdbc.update(DELETE_FRIEND, friendId, id);
     }
 
     @Override

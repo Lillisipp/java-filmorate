@@ -25,6 +25,11 @@ public class UserController {
         return userService.updateUser(newUser);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteUser(@Valid @RequestBody UserDto user) {
+        userService.deleteUser(user.getId());
+    }
+
     @GetMapping
     public Collection<UserDto> getUsers() {
         return userService.getUsers();

@@ -25,7 +25,6 @@ class UserDbStorageTest {
 
     private final UserDbStorage userDbStorage;
 
-    // уникальные значения, чтобы не конфликтовать с data.sql (где уже есть u1/u2/u3)
     private User newUser(String email, String login, String name) {
         return new User(
                 null,
